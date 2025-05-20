@@ -1,5 +1,3 @@
-Here is the **clean documentation** of your robot control system based on the provided source code structure.
-
 ---
 
 # 📁 **Project Documentation: Embedded Robot Control System**
@@ -231,5 +229,3 @@ extern robot_t robot;
 When `DEBUG == 1`, additional debug state and FSM handler (`Test_FSM_Handler()`) are enabled for controlled testing of specific behaviors like turns, forward/reverse motions, and stop.
 
 ---
-
-Let me know if you need class diagrams, flowcharts, or code comments added!
