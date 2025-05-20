@@ -28,6 +28,10 @@
 
 #include "IRLine.h"
 #include "Arduino.h"
+#include "config.h"
+#include "robot.h"
+
+extern robot_t robot;
 
 IRLine_t::IRLine_t()
 {
@@ -117,8 +121,66 @@ void IRLine_t::calcCrosses(void)
   } else {
     if (cross_count > 0) cross_count--;
   }
-
 }
+
+
+static void adc_set_channel(int channel)
+{
+	gpio_put_masked(digitalPinToBitMask(MUXA_PIN) | digitalPinToBitMask(MUXB_PIN) | digitalPinToBitMask(MUXC_PIN), channel << MUXA_PIN);
+  //digitalWrite(MUXA_PIN, channel & 1);
+  //digitalWrite(MUXB_PIN, (channel >> 1) & 1);
+  //digitalWrite(MUXC_PIN, (channel >> 2) & 1);
+}
+
+uint16_t read_adc(int channel)
+{
+	adc_set_channel(channel); // Switch external MUX to the desired channel
+	//delayMicroseconds(100);
+  delayMicroseconds(100);
+	return analogRead(A2);    // The mux connects to analog input A2
+}
+
+void IRLine_t::readIRSensors(void)
+{
+  byte c;  // Read the five IR sensors using the AD converter
+  for (c = 0; c < IRSENSORS_COUNT; c++) 
+  {
+    robot.IRLine.IR_values[(IRSENSORS_COUNT - 1) -c] = 1023 - read_adc(3 + c);
+  }
+  Serial.println();
+}
+
+
+uint32_t IRLine_t::encodeIRSensors(void)
+{
+  byte c;                                           // Encode five IR sensors with 6 bits for each sensor
+  uint32_t result = robot.IRLine.IR_values[0] >> 4; // From 10 bits to 6 bits
+  for (c = 1; c < 5; c++)
+  {
+    result = (result << 6) | (robot.IRLine.IR_values[c] >> 4);
+  }
+  return result;
+}
+
+
+
+
+
+
+
+void IRLine_t::printIRLine(void)
+{
+  Serial.print(robot.IRLine.IR_values[0]);
+  Serial.print("               ");
+  Serial.print(robot.IRLine.IR_values[1]);
+  Serial.print("               ");
+  Serial.print(robot.IRLine.IR_values[2]);
+  Serial.print("               ");
+  Serial.print(robot.IRLine.IR_values[3]);
+  Serial.print("               ");
+  Serial.println(robot.IRLine.IR_values[4]);
+}
+
 
 /*
 void IRLine_t::calcIRLineCenter(void)
