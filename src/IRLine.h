@@ -49,12 +49,19 @@ class IRLine_t
     float blacks;
 
     IRLine_t();
+
+    void readIRSensors(void);
+    uint32_t encodeIRSensors(void);
+ 
+
+    void printIRLine(void);
     
     void calibrate(void);
     
     void calcIRLineEdgeLeft(void);
     void calcIRLineEdgeRight(void);
     //void calcIRLineCenter(void);
+    
 
     void calcCrosses(void);
 
