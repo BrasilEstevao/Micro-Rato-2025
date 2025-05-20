@@ -2,7 +2,6 @@
 #define STATE_MACHINES_H
 
 #include "config.h"
-#define DEBUG 1
 
 // Define timer block for timers
 typedef struct {
@@ -49,6 +48,7 @@ typedef enum {
   RIGHT_TURN_TEST,
   LEFT_TURN_TEST, 
   BACWARD_TEST,
+  U_TURN_TEST,
   STOP_TEST
 } StateNamesTest;
 
