@@ -1,13 +1,16 @@
-#include <stack>
 #include <Arduino.h>
-#include <string>
+#include <stack>
 #include "state_machines.h"
 #include "robot.h"
-
-//#define LEFT
-#define RIGHT
+#include "path_handler.h"
 
 using namespace std;
+
+char last_move;
+
+int last_move_changed = 0;
+
+stack<char> instructions; // Stack to store instructions to be executed
 
 extern robot_t robot;
 
@@ -98,119 +101,8 @@ void stop_timer(timerBlock* t)
 	t->time = 0;
 }
 
-// Function to get the path from the original stack
-// This function will process the stack and return a new stack with the optimized path
-
-stack<char> get_path(stack<char> original) {
-  stack<char> tempStack;
-  bool changed = true;
-    
-  while (changed) {
-    changed = false;
-    // Transfer original to tempStack while checking for patterns
-    while (!original.empty()) {
-      char top = original.top();
-      original.pop();
-      tempStack.push(top);
-            
-      // Check if we have at least 3 elements to form a pattern
-      if (tempStack.size() >= 3) {
-        // Get the top three elements
-        char third = tempStack.top(); tempStack.pop();
-        char second = tempStack.top(); tempStack.pop();
-        char first = tempStack.top(); tempStack.pop();
-                
-        string pattern = {first, second, third};
-                
-        #ifdef LEFT 
-        // Check for left-hand patterns 
-          if (pattern == "LUL") {
-            tempStack.push('F');
-            changed = true;
-          } else if (pattern == "FUL") {
-            tempStack.push('R');
-            changed = true;
-          } else if (pattern == "LUF") {
-            tempStack.push('R');
-            changed = true;
-          } else if (pattern == "RUL") {
-            tempStack.push('U');
-            changed = true;
-          } else if (pattern == "LUR") {
-            tempStack.push('U');
-            changed = true;
-          } else {
-            tempStack.push(first);
-            tempStack.push(second);
-            tempStack.push(third);
-          }
-        #endif
-
-        #ifdef RIGHT
-        // Check for right-hand patterns
-          if (pattern == "RUR") {
-            tempStack.push('F');
-            changed = true;
-          } else if (pattern == "FUR") {
-            tempStack.push('L');
-            changed = true;
-          } else if (pattern == "RUF") {
-            tempStack.push('L');
-            changed = true;
-          } else if (pattern == "LUR") {
-            tempStack.push('U');
-            changed = true;
-          } else if (pattern == "RUL") {
-            tempStack.push('U');
-            changed = true;
-          } else {
-            tempStack.push(first);
-            tempStack.push(second);
-            tempStack.push(third);
-          }
-        #endif
-               
-      }
-    }
-        
-    // Transfer back to original stack for next iteration
-    while (!tempStack.empty()) {
-      original.push(tempStack.top());
-      tempStack.pop();
-    }
-  }
-
-  // Final reversal for correct output order
-  stack<char> final_path;
-  while (!original.empty()) {
-    final_path.push(original.top());
-    original.pop();
-  }
-
-  #ifdef DEBUG
-    Serial.print("Final Path: ");
-    stack<char> debug_copy;
-    // Print and save to debug_copy to restore later
-    while (!final_path.empty()) {
-      char c = final_path.top();
-      Serial.print(c);
-      debug_copy.push(c);
-      final_path.pop();
-    }
-    Serial.println();
-    // Restore final_path from debug_copy
-    while (!debug_copy.empty()) {
-      final_path.push(debug_copy.top());
-      debug_copy.pop();
-    }
-  #endif
-
-  // Return the final optimized path
-  return final_path;
-}
-
-// void main_FSM_Handler() 
-// {
+void main_FSM_Handler() 
+{
 //  switch (currentStateMain) 
 // 		{
 			
@@ -233,9 +125,8 @@ stack<char> get_path(stack<char> original) {
 			
 // 				#ifdef DEBUG
 // 				printf("-- Current state main = MAP\n");
-// 				#endif			
-			
-				
+//   			#endif;
+		
 // 				if(END_MAP)
 // 				{
 // 					currentStateMain = READY;
@@ -298,15 +189,15 @@ stack<char> get_path(stack<char> original) {
         
 // //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
 // // Update outputs
-// switch(currentStateMain)
-//     {
+    switch(currentStateMain){
 //     case IDLE_MAIN:
 //         //stop motors
 //         // clear up instructions and temporary stacks 
 //         break;
 
-//     case MAP:
-//         //stop motors again( I guess)
+      case MAP:
+        //stop motors again( I guess)
+
 //         break;
 
 //     case READY:
@@ -316,7 +207,7 @@ stack<char> get_path(stack<char> original) {
 //     default:
 //         break;
 //     }
-// }
+    }
 
 
 
@@ -329,6 +220,8 @@ stack<char> get_path(stack<char> original) {
 
 // void Map_FSM_Handler()
 // {
+//     if(last_move_changed) save_move(last_move);
+//     last_move_changed = 0;
 //     switch(currentStateMap)
 // 		{
 
@@ -361,7 +254,7 @@ stack<char> get_path(stack<char> original) {
 //           currentStateMap = SMALL_FORWARD;
 //         }
 
-//         if(detetct_left()) //XXXOO
+//         if(detect_left()) //XXXOO
 //         {
 //           currentStateMap = LEFT_TURN_MAP;
 //         }
@@ -377,6 +270,8 @@ stack<char> get_path(stack<char> original) {
 
 // 				if(END_U_TURN)
 // 				{
+//           last_move = 'U';
+//           last_move_changed = 1;
 //           currentStateMap = FOLLOW_LINE_MAP;
 // 				}
 
@@ -391,6 +286,8 @@ stack<char> get_path(stack<char> original) {
 
 //         if(END_LEFT_TURN)
 //         {
+//           last_move = 'L';
+//           last_move_changed = 1;
 //           currentStateMap = FOLLOW_LINE_MAP;
 //         }
 
@@ -422,6 +319,8 @@ stack<char> get_path(stack<char> original) {
 
 //         if(1)
 //         {
+//           last_move = 'F';
+//           last_move_changed = 1;
 //           currentStateMap = FOLLOW_LINE_MAP;
 //         }
 
@@ -439,7 +338,7 @@ stack<char> get_path(stack<char> original) {
 //         }
 
 //       break;
-//     }
+}
 
 
 
