@@ -21,7 +21,7 @@ using namespace std;
  * @return A new stack containing the optimized path.
  */
 
-stack<char> get_path(stack<char> original);
+stack<char> get_path();
 
 /**
  * @brief Saves the move made by the robot to a stack.

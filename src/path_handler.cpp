@@ -13,16 +13,16 @@ stack<char> movements_made; // Stack to store movements made
 // Function to get the path from the original stack
 // This function will process the stack and return a new stack with the optimized path
 
-stack<char> get_path(stack<char> original) {
+stack<char> get_path() {
   stack<char> tempStack;
   bool changed = true;
     
   while (changed) {
     changed = false;
     // Transfer original to tempStack while checking for patterns
-    while (!original.empty()) {
-      char top = original.top();
-      original.pop();
+    while (!movements_made.empty()) {
+      char top = movements_made.top();
+      movements_made.pop();
       tempStack.push(top);
             
       // Check if we have at least 3 elements to form a pattern
@@ -87,16 +87,16 @@ stack<char> get_path(stack<char> original) {
         
     // Transfer back to original stack for next iteration
     while (!tempStack.empty()) {
-      original.push(tempStack.top());
+      movements_made.push(tempStack.top());
       tempStack.pop();
     }
   }
 
   // Final reversal for correct output order
   stack<char> final_path;
-  while (!original.empty()) {
-    final_path.push(original.top());
-    original.pop();
+  while (!movements_made.empty()) {
+    final_path.push(movements_made.top());
+    movements_made.pop();
   }
 
   #ifdef DEBUG
