@@ -189,13 +189,13 @@ void main_FSM_Handler()
         
 // //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
 // // Update outputs
-    switch(currentStateMain){
+ //   switch(currentStateMain){
 //     case IDLE_MAIN:
 //         //stop motors
 //         // clear up instructions and temporary stacks 
 //         break;
 
-      case MAP:
+//      case MAP:
         //stop motors again( I guess)
 
 //         break;
@@ -207,7 +207,7 @@ void main_FSM_Handler()
 //     default:
 //         break;
 //     }
-    }
+   }
 
 
 
@@ -218,12 +218,13 @@ void main_FSM_Handler()
 
 
 
-// void Map_FSM_Handler()
-// {
+
+void Map_FSM_Handler()
+{
 //     if(last_move_changed) save_move(last_move);
 //     last_move_changed = 0;
-//     switch(currentStateMap)
-// 		{
+       switch(currentStateMap)
+     		{
 
 // 			case IDLE_MAP:
 
@@ -326,20 +327,21 @@ void main_FSM_Handler()
 
 //       break;
 
-//       case END:
+         case END:
 
 //         #ifdef DEBUG
 //         printf("-- Current state map = END\n");
 //         #endif
 
-//         if(1)
-//         {
-//           currentStateMap = IDLE_MAP;
-//         }
+         if(1)
+         {
+           currentStateMap = IDLE_MAP;
+           instructions = get_path();
+           }
 
-//       break;
+           break;
+    }
 }
-
 
 
 //     //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
