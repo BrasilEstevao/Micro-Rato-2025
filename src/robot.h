@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <math.h>
+//#include <Adafruit_MotorShield.h>  // Adicionado suporte para Motorshield
 //#include "PID.h"
 #include "IRLine.h"
 #include "state_machines.h"

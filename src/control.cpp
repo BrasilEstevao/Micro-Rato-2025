@@ -6,7 +6,7 @@
 #include "robot.h"
 
 
-extern robot_t robot;
+extern robot_t robot; 
 
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
