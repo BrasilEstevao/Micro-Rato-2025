@@ -3,6 +3,7 @@
 #include "state_machines.h"
 #include "robot.h"
 #include "config.h"
+#include "path_handler.h"
 
 //#define DEBUG 1
 
@@ -39,9 +40,6 @@ void setup()
   pinMode(MOTOR2A_PIN, OUTPUT);
   pinMode(MOTOR2B_PIN, OUTPUT);
 
-  pinMode(SOLENOID_PIN_A, OUTPUT);
-  pinMode(SOLENOID_PIN_B, OUTPUT);
-
 
    // ADC mux pins
   pinMode(MUXA_PIN, OUTPUT);
@@ -51,44 +49,33 @@ void setup()
   //init_PIO_dual_encoders(ENC1_A, ENC2_A);
 
   analogReadResolution(10);
+
+  //Initialize the robot stopped
+  currentStateTest = STOP_TEST;
   
 }
 
 
 void loop() {
 		
-
-		#ifdef DEBUG
-		printf ("\n*** Inicio do Ciclo ***\n");
-		#endif
     
-
-    
-  // Read and process sensors
-   // read_PIO_encoders();
-
-  robot.IRLine.readIRSensors();
-
-  robot.IRLine.printIRLine();
-
-
-    
+  // Read and print sensors
+    robot.IRLine.readIRSensors();
+    //robot.IRLine.printIRLine();
 
 
 
     robot.setMotorPWM(robot.PWM_1, MOTOR1A_PIN, MOTOR1B_PIN);
     robot.setMotorPWM(robot.PWM_2, MOTOR2A_PIN, MOTOR2B_PIN);
 
-    robot.setMotorPWM(robot.solenoid_PWM, SOLENOID_PIN_A, SOLENOID_PIN_B);
-
 
 	  edge_detection();
-		update_timers();
+
 
     // Main_FSM_Handler();
     // Map_FSM_Handler();
     // Solve_FSM_Handler();
-    //Test_FSM_Handler();
+    Test_FSM_Handler();
 
     // Serial.printf("PWM1: %d\n",robot.PWM_1);
     // Serial.printf("PWM2%d\n",robot.PWM_2);
