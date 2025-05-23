@@ -16,8 +16,6 @@ int read_PIO_encoder(int sm);
 */
 
 
-
-
 void setup()
 {
 
