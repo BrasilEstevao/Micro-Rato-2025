@@ -2,7 +2,6 @@
 #define STATE_MACHINES_H
 
 #include "config.h"
-#define DEBUG 1
 
 // Define timer block for timers
 typedef struct {
@@ -45,11 +44,16 @@ typedef enum {
 
 // Test state machine state names
 typedef enum {
+  FOLLOW_TEST,
   FORWARD_TEST,
+  SMALL_FORWARD_TEST,
   RIGHT_TURN_TEST,
   LEFT_TURN_TEST, 
-  BACWARD_TEST,
-  STOP_TEST
+  BACKWARD_TEST,
+  U_TURN_TEST,
+  STOP_TEST,
+  END_TEST,
+  IDLE_TEST
 } StateNamesTest;
 
 // Extern variables
@@ -57,6 +61,8 @@ typedef enum {
 // extern StateNamesMap currentStateMap;
 // extern StateNamesSolve currentStateSolve;
 extern StateNamesTest currentStateTest;
+
+
 
 extern bool END_MAP;
 extern bool END_SOLVE;
@@ -69,9 +75,10 @@ void stop_timer(timerBlock* t);
 void init_ST();
 
 
-// void Main_FSM_Handler();
-// void Map_FSM_Handler();
-// void Solve_FSM_Handler();
+//state machines
+void Main_FSM_Handler();
+void Map_FSM_Handler();
+void Solve_FSM_Handler();
 void Test_FSM_Handler();
 
 #endif // STATE_MACHINES_H
