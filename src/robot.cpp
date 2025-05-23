@@ -27,9 +27,13 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include <Arduino.h>
+#include <Adafruit_MotorShield.h>
 #include "robot.h"
+#include "config.h"
 
 robot_t robot;
+
+int nominal_speed = NOMINAL_SPEED;
 
 robot_t::robot_t()
 {
@@ -71,11 +75,7 @@ void robot_t::odometry(void)
 }
 
 
-void robot_t::setRobotVW(float Vnom, float Wnom)
-{
-  v_req = Vnom;
-  w_req = Wnom;
-}
+
 
 
 void robot_t::accelerationLimit(void)
@@ -119,6 +119,58 @@ void robot_t::VWToMotorsVoltage(void)
  // }
 }
 
+
+/*void robot_t::setMotorPWM(int new_PWM, int pin_a, int pin_b)
+{
+  int PWM_max = 200;
+  if (new_PWM >  PWM_max) new_PWM =  PWM_max;
+  if (new_PWM < -PWM_max) new_PWM = -PWM_max;
+  
+  if (new_PWM == 0) 
+  {  // Both outputs 0 -> A = H, B = H
+    analogWrite(pin_a, 255);
+    analogWrite(pin_b, 255);
+
+  } else if (new_PWM > 0) 
+  {
+    analogWrite(pin_a, 255 - new_PWM);
+    analogWrite(pin_b, 255);
+
+  } 
+  else 
+  {
+    analogWrite(pin_a, 255);
+    analogWrite(pin_b, 255 + new_PWM);
+  }
+}
+*/
+
+void robot_t::setMotorSpeed(Adafruit_DCMotor *motor, int speed) {
+
+  if (motor == nullptr) {
+    Serial.println("Motor not initialized!");
+    return;
+  }
+  printf("cpt a\n");
+  int speed_max = 200;
+  //printf("cpt b\n");
+  if (speed > speed_max) speed = speed_max;
+  if (speed < -speed_max) speed = -speed_max;
+  //printf("cpt c\n");
+  if (speed > 0) {
+    motor->run(FORWARD);
+    motor->setSpeed(speed);
+    printf("speed = %d\n", speed);
+  } else if (speed < 0) {
+    motor->run(BACKWARD);
+    motor->setSpeed(-speed);
+    //printf("cpt e\n");
+  } else {
+    motor->run(RELEASE);
+    //printf("cpt f\n");
+  }
+}
+
 // void robot_t::followLineRight(float Vnom, float K)
 // {
 //   w_req = K * IRLine.pos_right;
@@ -138,10 +190,17 @@ void robot_t::VWToMotorsVoltage(void)
 
 
 
+
 void robot_t::stop()
 {
   robot.PWM_1 = 0;
   robot.PWM_2 = 0; 
+}
+
+
+
+int robot_t::IR_sum(){
+  return IRLine.IR_values[0] + IRLine.IR_values[1] + IRLine.IR_values[2] + IRLine.IR_values[3] + IRLine.IR_values[4];
 }
 
 
@@ -178,28 +237,60 @@ void robot_t::stop()
 
 
 
-
  void robot_t::left_turn()
  {
+   static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = -100;
+       PWM_2 = 100;
+    }
+
+    if (millis() - start_time > 435) { // 435ms to turn ~90º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
 
  }
-  void robot_t::right_turn()
-  {
+void robot_t::right_turn()
+{
+  static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = 100;
+       PWM_2 = -100;
+    }
 
-  }
+    if (millis() - start_time > 435) { // 435ms to turn ~90º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
+}
+
   void robot_t::u_turn()
   {
+      static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = 100;
+       PWM_2 = -100;
+    }
+
+    if (millis() - start_time > 833) { // 833ms to turn ~180º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
 
   }
-  void robot_t::reverse(int leftPWM, int rightPWM)
+  void robot_t::reverse()
   {
-    robot,PWM_1 = leftPWM;
-    robot,PWM_2 = rightPWM;
+    PWM_1 =  nominal_speed;
+    PWM_2 = nominal_speed;
   }
-  void robot_t::forward( int leftPWM, int rightPWM)
+  void robot_t::forward( )
   {
-    robot,PWM_1 = leftPWM;
-    robot,PWM_2 = rightPWM;
+    PWM_1 =  nominal_speed;
+    PWM_2 = nominal_speed;
   }
 
 

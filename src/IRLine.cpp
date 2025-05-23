@@ -33,6 +33,9 @@
 
 extern robot_t robot;
 
+// Define the analog pins for each IR sensor on ESP32
+const uint8_t IR_PINS[5] = {IR1_PIN, IR2_PIN, IR3_PIN, IR4_PIN, IR5_PIN};
+
 IRLine_t::IRLine_t()
 {
   IR_WaterLevel = 0;
@@ -123,31 +126,16 @@ void IRLine_t::calcCrosses(void)
   }
 }
 
-
-static void adc_set_channel(int channel)
-{
-	gpio_put_masked(digitalPinToBitMask(MUXA_PIN) | digitalPinToBitMask(MUXB_PIN) | digitalPinToBitMask(MUXC_PIN), channel << MUXA_PIN);
-  //digitalWrite(MUXA_PIN, channel & 1);
-  //digitalWrite(MUXB_PIN, (channel >> 1) & 1);
-  //digitalWrite(MUXC_PIN, (channel >> 2) & 1);
-}
-
-uint16_t read_adc(int channel)
-{
-	adc_set_channel(channel); // Switch external MUX to the desired channel
-	//delayMicroseconds(100);
-  delayMicroseconds(100);
-	return analogRead(A2);    // The mux connects to analog input A2
-}
-
 void IRLine_t::readIRSensors(void)
 {
-  byte c;  // Read the five IR sensors using the AD converter
-  for (c = 0; c < IRSENSORS_COUNT; c++) 
-  {
-    robot.IRLine.IR_values[(IRSENSORS_COUNT - 1) -c] = 1023 - read_adc(3 + c);
+  // Read all five IR sensors directly from their analog pins
+  for (byte c = 0; c < 5; c++) {
+    // ESP32 has 12-bit ADC (0-4095), scaling to match original 10-bit (0-1023)
+    robot.IRLine.IR_values[c] = 1023 - (analogRead(IR_PINS[c]) >> 2);
   }
-  Serial.println();
+  
+  // Small stabilization delay (optional)
+  delayMicroseconds(100);
 }
 
 
@@ -161,9 +149,6 @@ uint32_t IRLine_t::encodeIRSensors(void)
   }
   return result;
 }
-
-
-
 
 
 

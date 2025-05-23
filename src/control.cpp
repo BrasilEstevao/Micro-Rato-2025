@@ -1,18 +1,15 @@
+#define RUN 
+#define TEST 1
+
+#define DEBUG 1
+
 #include <Arduino.h>
-#include <stack>
+#include <Adafruit_MotorShield.h>
 #include "state_machines.h"
 #include "robot.h"
-#include "path_handler.h"
 
-using namespace std;
 
-char last_move;
-
-int last_move_changed = 0;
-
-stack<char> instructions; // Stack to store instructions to be executed
-
-extern robot_t robot;
+extern robot_t robot; 
 
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
@@ -23,15 +20,20 @@ StateNamesTest currentStateTest = STOP_TEST;
 bool END_MAP = false;
 bool END_SOLVE = false;
 
+
 //edge detection variables
 int p_START_BUTTON = 0;
 int re_START_BUTTON = 0;
+
+
 
 
 // Cycle time variables
 unsigned int start_time = 0, end_time = 0, cycle_time = 0;
 
 // Timers (exemplo)
+
+
 // timerBlock timer_Exampler;
 
 void init_ST()
@@ -51,20 +53,20 @@ void init_ST()
 
 void edge_detection()
 {
-    bool currentState = digitalRead(START_BUTTON);
+    bool currentButtonState = digitalRead(START_BUTTON);
 
     //if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (!p_START_BUTTON && currentState) {
+        if (!p_START_BUTTON && currentButtonState) {
             re_START_BUTTON = true;
         } else {
             re_START_BUTTON = false;
         }
-        p_START_BUTTON = currentState;
+        p_START_BUTTON = currentButtonState;
   
     //}
-	// #ifdef DEBUG
-	// Serial.printf("-- Edges re_BUTTON=%d p_BUTTON=%d\n", re_START_BUTTON, p_START_BUTTON);
-	// #endif
+	#ifdef DEBUG
+	Serial.printf("-- Edges re_BUTTON=%d p_BUTTON=%d\n", re_START_BUTTON, p_START_BUTTON);
+	#endif
 }
 
 void update_timers()
@@ -101,114 +103,120 @@ void stop_timer(timerBlock* t)
 	t->time = 0;
 }
 
+
+
+
+
+
+#ifdef RUN
 void main_FSM_Handler() 
 {
-//  switch (currentStateMain) 
-// 		{
+ switch (currentStateMain) 
+		{
 			
-// 			case IDLE_MAIN :
+			case IDLE_MAIN :
 			
-// 				#ifdef DEBUG
-// 				printf("-- Current state main  = IDLE\n");
-// 				#endif
+				#ifdef DEBUG
+				printf("-- Current state main  = IDLE\n");
+				#endif
 
 				
-// 				if (digitalRead(START_BUTTON)) 
-// 				{
-//     					currentStateMain = MAP;
-//         }
+				if (digitalRead(START_BUTTON)) 
+				{
+    					currentStateMain = MAP;
+        }
 
 				
-// 				break;
+				break;
 			
-// 			case MAP:
+			case MAP:
 			
-// 				#ifdef DEBUG
-// 				printf("-- Current state main = MAP\n");
-//   			#endif;
-		
-// 				if(END_MAP)
-// 				{
-// 					currentStateMain = READY;
-// 				}
+				#ifdef DEBUG
+				printf("-- Current state main = MAP\n");
+				#endif			
+			
+				
+				if(END_MAP)
+				{
+					currentStateMain = READY;
+				}
 
-// 			break;
+			break;
 			
-// 			case READY :
+			case READY :
 			
-// 				#ifdef DEBUG
-// 				printf("-- Current state main = READY\n");
-// 				#endif
+				#ifdef DEBUG
+				printf("-- Current state main = READY\n");
+				#endif
 
 
 				
-// 				if(digitalRead(START_BUTTON))
-// 				{
-// 					currentStateMain = SOLVE;
-// 				}
+				if(digitalRead(START_BUTTON))
+				{
+					currentStateMain = SOLVE;
+				}
 
-//         if(digitalRead(RESET_BUTTON))
-//         {
-//           currentStateMain = MAP;
-//         }
+        if(digitalRead(RESET_BUTTON))
+        {
+          currentStateMain = MAP;
+        }
 
-// 			break;
+			break;
 			
-// 			case SOLVE:
-// 			#ifdef DEBUG
-// 			printf("-- Current state main = SOLVE\r\n");
-// 			#endif
+			case SOLVE:
+			#ifdef DEBUG
+			printf("-- Current state main = SOLVE\r\n");
+			#endif
 		
 		
-// 			if (END_SOLVE) 
-// 			{
-// 				currentStateMain = SOLVED; 
-// 			}
+			if (END_SOLVE) 
+			{
+				currentStateMain = SOLVED; 
+			}
 		
-// 			break;
+			break;
 		
-// 		case SOLVED:
-// 			#ifdef DEBUG
-// 			printf("-- Current state main = SOLVED\n");
-// 			#endif
+		case SOLVED:
+			#ifdef DEBUG
+			printf("-- Current state main = SOLVED\n");
+			#endif
 		
 			
-// 			if (digitalRead(START_BUTTON)) 
-// 			{
-//         currentStateMain = SOLVE;
-// 			}
+			if (digitalRead(START_BUTTON)) 
+			{
+        currentStateMain = SOLVE;
+			}
 
-//       if(digitalRead(RESET_BUTTON))
-//       {
-//         currentStateMain = IDLE_MAIN;
-//       }
-// 			break;
+      if(digitalRead(RESET_BUTTON))
+      {
+        currentStateMain = IDLE_MAIN;
+      }
+			break;
 
-// 		} 
+		} 
         
         
-// //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
-// // Update outputs
- //   switch(currentStateMain){
-//     case IDLE_MAIN:
-//         //stop motors
-//         // clear up instructions and temporary stacks 
-//         break;
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
+// Update outputs
+switch(currentStateMain)
+    {
+    case IDLE_MAIN:
+        //stop motors
+        // clear up instructions and temporary stacks 
+        break;
 
-//      case MAP:
+    case MAP:
         //stop motors again( I guess)
+        break;
 
-//         break;
+    case READY:
+        //copy instructions to temporary stack; (for running again if needed)
+        break;
 
-//     case READY:
-//         //copy instructions to temporary stack; (for running again if needed)
-//         break;
-
-//     default:
-//         break;
-//     }
-   }
-
+    default:
+        break;
+    }
+}
 
 
 
@@ -221,193 +229,186 @@ void main_FSM_Handler()
 
 void Map_FSM_Handler()
 {
-//     if(last_move_changed) save_move(last_move);
-//     last_move_changed = 0;
-       switch(currentStateMap)
-     		{
+    switch(currentStateMap)
+		{
 
-// 			case IDLE_MAP:
+			case IDLE_MAP:
 
-// 				#ifdef DEBUG
-// 				printf("-- Current state map = IDLE\n");
-// 				#endif
+				#ifdef DEBUG
+				printf("-- Current state map = IDLE\n");
+				#endif
 
-// 				if(currentStateMain == MAP)
-//         {
-//           currentStateMap = FOLLOW_LINE_MAP;
-//         }
+				if(currentStateMain == MAP)
+        {
+          currentStateMap = FOLLOW_LINE_MAP;
+        }
 
-// 			break;
+			break;
 
-// 			case FOLLOW_LINE_MAP:
+			case FOLLOW_LINE_MAP:
 
-// 				#ifdef DEBUG
-// 				printf("-- Current state map = FOLLOW_LINE\n");
-// 				#endif
-
-// 				if(detect_all_white()) 
-// 				{
-// 					currentStateMap = U_TURN;
-// 				}
+				#ifdef DEBUG
+				printf("-- Current state map = FOLLOW_LINE\n");
+				#endif
+/*
+				if(detect_all_white()) 
+				{
+					currentStateMap = U_TURN;
+				}
 				
-//         if(detect_right() || detect_full_line()) //OOXXX || XXXXX
-//         {
-//           currentStateMap = SMALL_FORWARD;
-//         }
+        if(detect_right() || detect_full_line()) //OOXXX || XXXXX
+        {
+          currentStateMap = SMALL_FORWARD;
+        }
 
-//         if(detect_left()) //XXXOO
-//         {
-//           currentStateMap = LEFT_TURN_MAP;
-//         }
-
-//       break;
-
-
-//       case U_TURN:
-
-//         #ifdef DEBUG
-//         printf("-- Current state map = U_TURN\n");
-//         #endif
-
-// 				if(END_U_TURN)
-// 				{
-//           last_move = 'U';
-//           last_move_changed = 1;
-//           currentStateMap = FOLLOW_LINE_MAP;
-// 				}
-
-// 			break;
+        if(detetct_left()) //XXXOO
+        {
+          currentStateMap = LEFT_TURN_MAP;
+        }
+*/
+      break;
 
 
-// 			case LEFT_TURN_MAP:
+      case U_TURN:
 
-//         #ifdef DEBUG
-//         printf("-- Current state map = LEFT_TURN\n");
-//         #endif
+        #ifdef DEBUG
+        printf("-- Current state map = U_TURN\n");
+        #endif
+/*
+				if(END_U_TURN)
+				{
+          currentStateMap = FOLLOW_LINE_MAP;
+				}
+*/
+			break;
 
-//         if(END_LEFT_TURN)
-//         {
-//           last_move = 'L';
-//           last_move_changed = 1;
-//           currentStateMap = FOLLOW_LINE_MAP;
-//         }
 
-//       break;
+			case LEFT_TURN_MAP:
 
-//       case SMALL_FORWARD:
+        #ifdef DEBUG
+        printf("-- Current state map = LEFT_TURN\n");
+        #endif
+/*
+        if(END_LEFT_TURN)
+        {
+          currentStateMap = FOLLOW_LINE_MAP;
+        }
+*/
+      break;
 
-//         #ifdef DEBUG
-//         printf("-- Current state map = SMALL_FORWARD\n");
-//         #endif
-				
-//         if(detect_forward()) //OOXOO
-//         {
-//           currentStateMap = FORWARD_MAP;
-//         }
+      case SMALL_FORWARD:
 
-//         if(detect_all_black()) //XXXXX
-//         {
-//           currentStateMap = END;
-//         }
+        #ifdef DEBUG
+        printf("-- Current state map = SMALL_FORWARD\n");
+        #endif
+				/*
+        if(detect_forward()) //OOXOO
+        {
+          currentStateMap = FORWARD_MAP;
+        }
 
-// 			break;
+        if(detect_all_black()) //XXXXX
+        {
+          currentStateMap = END;
+        }
+*/
+			break;
 
-//       case FORWARD_MAP:
+      case FORWARD_MAP:
 
-//         #ifdef DEBUG
-//         printf("-- Current state map = FORWARD\n");
-//         #endif
+        #ifdef DEBUG
+        printf("-- Current state map = FORWARD\n");
+        #endif
 
-//         if(1)
-//         {
-//           last_move = 'F';
-//           last_move_changed = 1;
-//           currentStateMap = FOLLOW_LINE_MAP;
-//         }
+        if(1)
+        {
+          currentStateMap = FOLLOW_LINE_MAP;
+        }
 
-//       break;
+      break;
 
-         case END:
+      case END:
 
-//         #ifdef DEBUG
-//         printf("-- Current state map = END\n");
-//         #endif
+        #ifdef DEBUG
+        printf("-- Current state map = END\n");
+        #endif
 
-         if(1)
-         {
-           currentStateMap = IDLE_MAP;
-           instructions = get_path();
-           }
+        if(1)
+        {
+          currentStateMap = IDLE_MAP;
+		    }
 
-           break;
+      break;
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
+ //update outputs
+
+// Update outputs
+switch(currentStateMap)
+    {
+    case IDLE_MAP:
+        
+      robot.stop();
+
+        break;
+
+    case FOLLOW_LINE_MAP:
+        //follow_line funtion
+
+        robot.followLine(); //mudar;
+        //Only real use of the PID
+        break;
+
+    case U_TURN:
+        //U-turn function 
+        robot.u_turn();// mudar;
+        //Just angular speed until -180 degrees (use encoders)
+        break;
+
+    case LEFT_TURN_MAP:
+        //left_turn function 
+        robot.left_turn(); //mudar;
+        //Just angular speed until -90 degrees (use encoders)
+        break;
+
+    case RIGHT_TURN_MAP:
+        //right_turn function
+        robot.right_turn();// mudar;
+        //Just angular speed until 90 degrees (use encoders)
+        break;
+
+    case REVERSE:
+        //reverse function 
+        robot.reverse(); //mudar;
+        //activate motors in oposite until see line (in this case, since its always turning left, it will see either OOXXX or OOXOO)
+        break;
+
+    case SMALL_FORWARD:
+        //small_forward function (maybe just forward function but with timer)
+        robot.forward(); //mudar;
+        break;
+
+    case FORWARD_MAP:
+        //forward function (go forward until OOXOO)
+        robot.forward(); //mudar;
+        break;
+
+    case END:
+        //run solving algorithm on path taken
+       // solve_algorithm();
+        //stop robot
+        robot.stop(); //mudar;
+        break;
+
+    default:
+        break;
     }
 }
 
 
-//     //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
-//  //update outputs
-
-// // Update outputs
-// switch(currentStateMap)
-//     {
-//     case IDLE_MAP:
-        
-//       robot.stop();
-
-//         break;
-
-//     case FOLLOW_LINE_MAP:
-//         //follow_line funtion
-
-//         robot.followLine(); mudar;
-//         //Only real use of the PID
-//         break;
-
-//     case U_TURN:
-//         //U-turn function 
-//         robot.u_turn(); mudar;
-//         //Just angular speed until -180 degrees (use encoders)
-//         break;
-
-//     case LEFT_TURN_MAP:
-//         //left_turn function 
-//         robot.left_turn(); mudar;
-//         //Just angular speed until -90 degrees (use encoders)
-//         break;
-
-//     case RIGHT_TURN_MAP:
-//         //right_turn function
-//         robot.right_turn(); mudar;
-//         //Just angular speed until 90 degrees (use encoders)
-//         break;
-
-//     case REVERSE:
-//         //reverse function 
-//         robot.reverse(); mudar;
-//         //activate motors in oposite until see line (in this case, since its always turning left, it will see either OOXXX or OOXOO)
-//         break;
-
-//     case SMALL_FORWARD:
-//         //small_forward function (maybe just forward function but with timer)
-//         robot.forward(); mudar;
-//         break;
-
-//     case FORWARD_MAP:
-//         //forward function (go forward until OOXOO)
-//         robot.forward(); mudar;
-//         break;
-
-//     case END:
-//         //run solving algorithm on path taken
-//         solve_algorithm();
-//         //stop robot
-//         robot.stop(); mudar;
-//         break;
-
-//     default:
-//         break;
-//     }
-// }
 
 
 
@@ -418,183 +419,186 @@ void Map_FSM_Handler()
 
 
 
-
-
-// void Solve_FSM_Handler()
-// {
-//   	switch (currentStateSolve)
-// 		{
+void Solve_FSM_Handler()
+{
+  	switch (currentStateSolve)
+		{
 
 
 
-// 			case IDLE_SOLVE:
+			case IDLE_SOLVE:
       
-//         #ifdef DEBUG
-//         printf("-- Current state solve = IDLE\n");
-//         #endif
+        #ifdef DEBUG
+        printf("-- Current state solve = IDLE\n");
+        #endif
 
-//         if(currentStateMain == SOLVE)
-//         {
-//           currentStateSolve = FOLLOW_LINE_SOLVE;
-//         }
+        if(currentStateMain == SOLVE)
+        {
+          currentStateSolve = FOLLOW_LINE_SOLVE;
+        }
 
-// 			break;
-
-
-
-
-// 			case FOLLOW_LINE_SOLVE:
-
-//         #ifdef DEBUG
-//         printf("-- Current state solve = FOLLOW_LINE\n");
-//         #endif
-
-//         if(Detect_node)
-//         {
-//           currentStateSolve  = GET_INSTRUCTION;
-//         }
-// 			break;
+			break;
 
 
 
 
-// 			case GET_INSTRUCTION:
+			case FOLLOW_LINE_SOLVE:
 
-//         #ifdef DEBUG
-//         printf("-- Current state solve = GET_INSTRUCTION\n");
-//         #endif
+        #ifdef DEBUG
+        printf("-- Current state solve = FOLLOW_LINE\n");
+        #endif
+/*
+        if(Detect_node)
+        {
+          currentStateSolve  = GET_INSTRUCTION;
+        }*/
+			break;
 
-// 				if(instruction == 'R')
-// 				{
-// 					currentStateSolve = RIGHT_TURN_SOLVE;
-// 				}
 
-//         if(instruction == 'L')
-//         {
-//           currentStateSolve = LEFT_TURN_SOLVE;
-//         }
 
-//         if(instruction == 'F')
-//         {
-//           currentStateSolve = FORWARD_SOLVE;
-//         }
+
+			case GET_INSTRUCTION:
+
+        #ifdef DEBUG
+        printf("-- Current state solve = GET_INSTRUCTION\n");
+        #endif
+/*
+				if(instruction == 'R')
+				{
+					currentStateSolve = RIGHT_TURN_SOLVE;
+				}
+
+        if(instruction == 'L')
+        {
+          currentStateSolve = LEFT_TURN_SOLVE;
+        }
+
+        if(instruction == 'F')
+        {
+          currentStateSolve = FORWARD_SOLVE;
+        }
       
-//         if(instructions.empty())
-//         {
-//           currentStateSolve = FINISH;
-//         }
+        if(instructions.empty())
+        {
+          currentStateSolve = FINISH;
+        }*/
 
-// 			break;
-
-
-
-
-// 			case RIGHT_TURN_SOLVE:
-
-//         #ifdef DEBUG
-//         printf("-- Current state solve = RIGHT_TURN_SOLVE\n");
-//         #endif
-
-//         if(back_on_line)
-//         {
-//           currentStateSolve = FOLLOW_LINE_SOLVE;
-//         }
-
-// 			break;
-
-
-
-//     case LEFT_TURN_SOLVE:
-
-//         #ifdef DEBUG
-//         printf("-- Current state solve = LEFT_TURN_SOLVE\n");
-//         #endif
-
-//         if(back_on_line)
-//         {
-//           currentStateSolve = FOLLOW_LINE_SOLVE;
-//         }
-
-//       break;
-
-//       case FORWARD_SOLVE:
-
-//         #ifdef DEBUG
-//         printf("-- Current state solve = FORWARD_SOLVE\n");
-//         #endif
-
-//         if(OOXOO)
-//         {
-//           currentStateSolve = FOLLOW_LINE_SOLVE;
-//         }
-
-//       break;
-
-//       case FINISH:
-
-//         #ifdef DEBUG
-//         printf("-- Current state solve = FINISH\n");
-//         #endif
-
-//         if(1)
-//         {
-//           currentStateSolve = IDLE_SOLVE;
-//         }
-
-//       break;
-
-//       }
+			break;
 
 
 
 
-//  //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
-// // Update outputs
-// switch(currentStateSolve)
-//     {
-//     case IDLE_SOLVE:
-//         //stop robot
-//         break;
+			case RIGHT_TURN_SOLVE:
 
-//     case FOLLOW_LINE_SOLVE:
-//         //follow_line function
-//         break;
+        #ifdef DEBUG
+        printf("-- Current state solve = RIGHT_TURN_SOLVE\n");
+        #endif
+/*
+        if(back_on_line)
+        {
+          currentStateSolve = FOLLOW_LINE_SOLVE;
+        }*/
 
-//     case GET_INSTRUCTION:
-//         //get_instruction function 
-//         //char currentInstruction = pathway.top(); 
-//         //pathway.pop();
-//         break;
-
-//     case RIGHT_TURN_SOLVE:
-//         //right_turn function
-//         //same as the one used in mapping
-//         break;
-
-//     case LEFT_TURN_SOLVE:
-//         //left_turn function
-//         //same as the one used in mapping
-//         break;
-
-//     case FORWARD_SOLVE:
-//         //forward function
-//         break;
-
-//     case FINISH:
-//         //stop robot / or any finish task
-//         break;
-
-//     default:
-//         break;
-//     }
-
-// }
+			break;
 
 
 
+    case LEFT_TURN_SOLVE:
+
+        #ifdef DEBUG
+        printf("-- Current state solve = LEFT_TURN_SOLVE\n");
+        #endif
+/*
+        if(back_on_line)
+        {
+          currentStateSolve = FOLLOW_LINE_SOLVE;
+        }*/
+
+      break;
+
+      case FORWARD_SOLVE:
+
+        #ifdef DEBUG
+        printf("-- Current state solve = FORWARD_SOLVE\n");
+        #endif
+/*
+        if(OOXOO)
+        {
+          currentStateSolve = FOLLOW_LINE_SOLVE;
+        }
+*/
+      break;
+
+      case FINISH:
+
+        #ifdef DEBUG
+        printf("-- Current state solve = FINISH\n");
+        #endif
+
+        if(1)
+        {
+          currentStateSolve = IDLE_SOLVE;
+        }
+
+      break;
+
+      }
+
+
+
+
+ //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
+// Update outputs
+switch(currentStateSolve)
+    {
+    case IDLE_SOLVE:
+        //stop robot
+        break;
+
+    case FOLLOW_LINE_SOLVE:
+        //follow_line function
+        break;
+
+    case GET_INSTRUCTION:
+        //get_instruction function 
+        //char currentInstruction = pathway.top(); 
+        //pathway.pop();
+        break;
+
+    case RIGHT_TURN_SOLVE:
+        //right_turn function
+        //same as the one used in mapping
+        break;
+
+    case LEFT_TURN_SOLVE:
+        //left_turn function
+        //same as the one used in mapping
+        break;
+
+    case FORWARD_SOLVE:
+        //forward function
+        break;
+
+    case FINISH:
+        //stop robot / or any finish task
+        break;
+
+    default:
+        break;
+    }
+
+}
+
+#endif
+
+#ifdef TEST
 
 void Test_FSM_Handler()
 {
+
+
+	static bool next_turn_left = true;
+
 
 	// Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
 	// Serial.println();
@@ -613,6 +617,52 @@ void Test_FSM_Handler()
         }
         break;
 
+
+	case RIGHT_TURN_TEST:
+
+	#ifdef DEBUG
+		Serial.printf("-- Current state test = RIGHT_TURN  and next_turn_left = %d\n", next_turn_left);
+		#endif
+
+		
+
+		if(robot.END_TURN == true) //signal from right turn function that means it has finished turning
+		{
+			currentStateTest = STOP_TEST;
+			robot.END_TURN = false;
+			next_turn_left = true;
+		}
+		break;
+
+	case LEFT_TURN_TEST:
+
+	#ifdef DEBUG
+		Serial.printf("-- Current state test = LEFT_TURN and next_turn_left = %d\n", next_turn_left);
+		#endif
+
+		
+
+		if(robot.END_TURN == true ) //signal from left turn function that means it has finished turning
+		{
+			currentStateTest = STOP_TEST;
+			robot.END_TURN = false;
+			next_turn_left = false;
+		}
+		break;
+
+	case U_TURN_TEST:
+
+	#ifdef DEBUG
+		Serial.print("-- Current state test = U_TURN\n");
+		#endif
+
+		if(robot.END_TURN == true) //signal from u turn function that means it has finished turning
+		{
+			currentStateTest = STOP_TEST;
+			robot.END_TURN = false;
+		}
+		break;
+
     case BACWARD_TEST:
 
     #ifdef DEBUG
@@ -627,29 +677,53 @@ void Test_FSM_Handler()
         break;
 
 		case STOP_TEST:
+
 			#ifdef DEBUG
-			Serial.print("-- Current state test = STOP\n");
+			Serial.printf("-- Current state test = STOP and next turn left = %d\n", next_turn_left);
 			#endif
 
-			 if(re_START_BUTTON == 1)
-        	{
-          currentStateTest = FORWARD_TEST;
-        	}
-			break;
-    }
+			robot.END_TURN = false; // extra safety
+
+			if(re_START_BUTTON == 1 && next_turn_left)
+			{
+				currentStateTest = LEFT_TURN_TEST;
+			}
+			else if(re_START_BUTTON == 1 && !next_turn_left)
+			{
+				currentStateTest = RIGHT_TURN_TEST;
+			}
+
+				break;
+	}
 
     // Update outputs
 
     switch(currentStateTest)
     {
     case FORWARD_TEST:
-        robot.forward(100, 100);
+        robot.forward();
         break;
+
+	case RIGHT_TURN_TEST:
+		robot.right_turn();
+		break;
+
+	case LEFT_TURN_TEST:
+		robot.left_turn();
+		break;
+
+	case U_TURN_TEST:
+		robot.u_turn();
+		break;
+
     case BACWARD_TEST:
-        robot.reverse(-100,-100);
+        robot.reverse();
         break;
+
 	case STOP_TEST:
 		robot.stop();
 		break;
     }
   }
+
+#endif

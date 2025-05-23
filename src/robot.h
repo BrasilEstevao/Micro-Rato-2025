@@ -5,8 +5,10 @@
 
 #include <Arduino.h>
 #include <math.h>
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>  // Adicionado suporte para Motorshield
 //#include "PID.h"
-//#include "IRLine.h"
+#include "IRLine.h"
 #include "state_machines.h"
 
 #ifndef NUM_WHEELS
@@ -27,6 +29,14 @@ class robot_t {
   float ds, dtheta;
   float rel_s, rel_theta;
   float xe, ye, thetae;
+   bool END_TURN = false;
+  unsigned long turn_start_time = 0;
+  bool is_turning = false;
+
+  Adafruit_DCMotor* motor_L = nullptr;
+  Adafruit_DCMotor* motor_R = nullptr;
+
+  void setMotorSpeed(Adafruit_DCMotor *motor, int speed);
 
   byte state;
   uint32_t tis, tes;
@@ -43,7 +53,7 @@ class robot_t {
   float u1, u2;
   int PWM_1, PWM_2;
   int PWM_1_req, PWM_2_req;
-    control_mode_t control_mode;
+  control_mode_t control_mode;
 
   double  IRkp = 8, IRki = 0.02, IRkd = 6;
   double lastIRkp = IRkp, lastIRki = IRki, lastIRkd = IRkd;
@@ -68,8 +78,7 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   //IRLine_t IRLine;
   float tof_dist, prev_tof_dist;
 
-  int LastTouchSwitch, TouchSwitch;
-  
+  IRLine_t IRLine;  
   
   robot_t();
 
@@ -80,6 +89,7 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
 
   void accelerationLimit(void);
   void VWToMotorsVoltage(void);
+  void setMotorPWM(int new_PWM, int pin_a, int pin_b);
  
 
   void followLineRight(float Vnom, float K);
@@ -89,9 +99,8 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   void left_turn();
   void right_turn();
   void u_turn();
-  void reverse(int leftPWM, int rightPWM);
-  void forward(int leftPWM, int rightPWM);
-
+  void reverse();
+  void forward();
 
   int IR_sum();
 };
