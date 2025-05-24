@@ -2,8 +2,8 @@
 #include <string>
 #include <Arduino.h>
 
-//#define FOLLOW LEFT
-#define FOLLOW RIGHT
+#define FOLLOW LEFT
+//#define FOLLOW RIGHT
 //#define DEBUG
 
 using namespace std;
