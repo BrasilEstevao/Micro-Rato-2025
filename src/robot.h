@@ -1,8 +1,4 @@
 
-#ifndef ROBOT_H
-  #define ROBOT_H
-#endif
-
 #include <Arduino.h>
 #include <math.h>
 #include <Wire.h>
@@ -13,6 +9,8 @@
 
 #ifndef NUM_WHEELS
 #define NUM_WHEELS 2
+
+#endif
 
 typedef enum { 
   cm_pwm,
@@ -30,9 +28,6 @@ class robot_t {
   float ds, dtheta;
   float rel_s, rel_theta;
   float xe, ye, thetae;
-   bool END_TURN = false;
-  unsigned long turn_start_time = 0;
-  bool is_turning = false;
 
   Adafruit_DCMotor* motor_L = nullptr;
   Adafruit_DCMotor* motor_R = nullptr;
@@ -92,6 +87,8 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
 
   void followLineRight(float Vnom, float K);
   void followLineLeft(float Vnom, float K);
+  void followLine();
+
   //node functions
   void stop();
   void left_turn();
@@ -106,5 +103,3 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
 
 extern robot_t robot;
 
-
-#endif // ROBOT_H

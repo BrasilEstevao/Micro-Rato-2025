@@ -27,6 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include <Arduino.h>
+#include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "robot.h"
 #include "IRLine.h"

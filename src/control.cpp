@@ -8,6 +8,7 @@
 #include "state_machines.h"
 #include "robot.h"
 #include "path_handler.h"
+#include "config.h"
 
 
 extern robot_t robot;
@@ -61,7 +62,7 @@ void init_ST()
 
 void edge_detection()
 {
-    bool currentButtonButtonState = digitalRead(START_BUTTON);
+    bool currentButtonState = digitalRead(START_BUTTON);
 
     //if ((millis() - lastDebounceTime) > debounceDelay) {
         if (!p_START_BUTTON && currentButtonState) {

@@ -104,22 +104,6 @@ void IRLine_t::calcIRLineEdgeRight(void)
 }
 
 
-
-static void adc_set_channel(int channel)
-{
-	gpio_put_masked(digitalPinToBitMask(MUXA_PIN) | digitalPinToBitMask(MUXB_PIN) | digitalPinToBitMask(MUXC_PIN), channel << MUXA_PIN);
-  //digitalWrite(MUXA_PIN, channel & 1);
-  //digitalWrite(MUXB_PIN, (channel >> 1) & 1);
-  //digitalWrite(MUXC_PIN, (channel >> 2) & 1);
-}
-
-uint16_t read_adc(int channel)
-{
-	adc_set_channel(channel); // Switch external MUX to the desired channel
-  delayMicroseconds(100);
-	return analogRead(A2);    // The mux connects to analog input A2
-}
-
 void IRLine_t::readIRSensors(void)
 {
   // Read all five IR sensors directly from their analog pins
@@ -141,8 +125,6 @@ uint32_t IRLine_t::encodeIRSensors(void)
   }
   return result;
 }
-
-
 
 
 void IRLine_t::printIRLine(void)

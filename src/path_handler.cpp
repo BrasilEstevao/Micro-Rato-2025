@@ -1,9 +1,10 @@
 #include <stack>
 #include <string>
 #include <Arduino.h>
+#include "config.h"
 
-//#define FOLLOW LEFT
-#define FOLLOW RIGHT
+//#define FOLLOW_LEFT
+#define FOLLOW_RIGHT
 //#define DEBUG
 
 using namespace std;
@@ -32,7 +33,7 @@ stack<char> get_path(stack <char> movements_made)
                 
         string pattern = {first, second, third};
                 
-        #ifdef FOLLOW LEFT 
+        #ifdef FOLLOW_LEFT
         // Check for left-hand patterns 
         if (pattern == "LUL") {
           tempStack.push('F');
@@ -56,7 +57,7 @@ stack<char> get_path(stack <char> movements_made)
         }
         #endif
 
-        #ifdef FOLLOW RIGHT
+        #ifdef FOLLOW_RIGHT
         // Check for right-hand patterns
         if (pattern == "RUR") {
           tempStack.push('F');
