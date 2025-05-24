@@ -7,6 +7,7 @@
 #include <math.h>
 //#include "PID.h"
 #include "IRLine.h"
+#include "IRLine.h"
 #include "state_machines.h"
 
 #ifndef NUM_WHEELS
@@ -21,6 +22,8 @@ class robot_t {
   public:
 
   //encoder stuff
+
+  //encoder stuff
   int enc1, enc2;
   float w1e, w2e;
   float v1e, v2e;
@@ -28,6 +31,12 @@ class robot_t {
   float ds, dtheta;
   float rel_s, rel_theta;
   float xe, ye, thetae;
+
+
+  //turning flags
+  bool END_TURN = false;
+  unsigned long turn_start_time = 0;
+  bool is_turning = false;
 
 
   //turning flags
@@ -47,6 +56,7 @@ class robot_t {
   float u1, u2;
   int PWM_1, PWM_2;
   int PWM_1_req, PWM_2_req;
+  control_mode_t control_mode;
   control_mode_t control_mode;
 
   double  IRkp = 0.1, IRki = 0, IRkd =0.3;
@@ -68,14 +78,18 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   float battery_voltage;
   int button_state;
   IRLine_t IRLine;  
+  IRLine_t IRLine;  
   
   robot_t();
 
   void odometry(void);
 
+
   void setRobotVW(float Vnom, float Wnom);
   void accelerationLimit(void);
   void VWToMotorsVoltage(void);
+
+  void setMotorPWM(int new_PWM, int pin_a, int pin_b);
 
   void setMotorPWM(int new_PWM, int pin_a, int pin_b);
  
@@ -92,13 +106,17 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   void u_turn();
   void reverse();
   void forward();
+  void reverse();
+  void forward();
 
 
   int IR_sum();
 };
 
 
+
 extern robot_t robot;
+
 
 
 #endif // ROBOT_H

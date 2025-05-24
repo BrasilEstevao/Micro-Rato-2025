@@ -80,6 +80,10 @@ void init_ST();
 void Main_FSM_Handler();
 void Map_FSM_Handler();
 void Solve_FSM_Handler();
+//state machines
+void Main_FSM_Handler();
+void Map_FSM_Handler();
+void Solve_FSM_Handler();
 void Test_FSM_Handler();
 
 #endif // STATE_MACHINES_H

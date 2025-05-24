@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "IRLine.h"
+#include "IRLine.h"
 #include "state_machines.h"
 #include "robot.h"
 #include "config.h"
@@ -30,6 +31,7 @@ void setup()
   pinMode(ENC2_B, INPUT_PULLUP);
 
 
+
  
 
   // Motor driver pins
@@ -39,6 +41,11 @@ void setup()
   pinMode(MOTOR2A_PIN, OUTPUT);
   pinMode(MOTOR2B_PIN, OUTPUT);
 
+
+   // ADC mux pins
+  pinMode(MUXA_PIN, OUTPUT);
+  pinMode(MUXB_PIN, OUTPUT);
+  pinMode(MUXC_PIN, OUTPUT);
 
    // ADC mux pins
   pinMode(MUXA_PIN, OUTPUT);
@@ -71,11 +78,14 @@ void loop() {
 	  edge_detection();
 
 
+
     // Main_FSM_Handler();
     // Map_FSM_Handler();
     // Solve_FSM_Handler();
     Test_FSM_Handler();
 
+    // Serial.printf("PWM1: %d\n",robot.PWM_1);
+    // Serial.printf("PWM2%d\n",robot.PWM_2);
     // Serial.printf("PWM1: %d\n",robot.PWM_1);
     // Serial.printf("PWM2%d\n",robot.PWM_2);
    

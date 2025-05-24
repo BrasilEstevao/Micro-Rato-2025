@@ -1,6 +1,6 @@
 //#define RUN 
 #define TEST 1
-#define DEBUG 1
+//#define DEBUG 1
 //#define SUPERDEBUG 1
 
 #include <Arduino.h>
@@ -16,7 +16,10 @@ stack<char> path_taken, solved_path;
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
 StateNamesSolve currentStateSolve = IDLE_SOLVE;
-StateNamesTest currentStateTest = FOLLOW_TEST;
+StateNamesTest currentStateTest = STOP_TEST;
+
+bool buttonStart, prevbuttonStart;
+bool buttonRestart, prevbuttonRestart;
 
 // Variáveis globais
 bool END_MAP = false;
@@ -31,6 +34,8 @@ static unsigned long forwardStartTime = 0;
 int p_START_BUTTON = 0;
 int re_START_BUTTON = 0;
 
+bool buttonStart_RE, buttonRestart_RE, buttonStart_FE, buttonRestart_FE; 
+
 
 
 
@@ -40,24 +45,35 @@ unsigned int start_time = 0, end_time = 0, cycle_time = 0;
 // Timers (exemplo)
 
 
-// timerBlock timer_Exampler
+// timerBlock timer_Exampler;
 
-void edge_detection()
-{
-    bool currentButtonState = digitalRead(START_BUTTON);
 
-    //if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (!p_START_BUTTON && currentButtonState) {
-            re_START_BUTTON = true;
-        } else {
-            re_START_BUTTON = false;
-        }
-        p_START_BUTTON = currentButtonState;
+void edge_detection(){
+  //   bool currentButtonState = digitalRead(START_BUTTON);
+
+  //   //if ((millis() - lastDebounceTime) > debounceDelay) {
+  //       if (!p_START_BUTTON && currentButtonState) {
+  //           re_START_BUTTON = true;
+  //       } else {
+  //           re_START_BUTTON = false;
+  //       }
+  //       p_START_BUTTON = currentButtonState;
   
-    //}
-	#ifdef DEBUG
-	Serial.printf("-- Edges re_BUTTON=%d p_BUTTON=%d\n", re_START_BUTTON, p_START_BUTTON);
-	#endif
+  //   //}
+	// #ifdef DEBUG
+	// Serial.printf("-- Edges re_BUTTON=%d p_BUTTON=%d\n", re_START_BUTTON, p_START_BUTTON);
+	// #endif
+
+  prevbuttonStart = buttonStart;
+  buttonStart = !digitalRead(START_BUTTON);
+  prevbuttonRestart = buttonRestart;
+  buttonRestart = !digitalRead(START_BUTTON);
+
+  buttonStart_RE = (buttonStart && !prevbuttonStart);
+  buttonRestart_RE = (buttonRestart && !prevbuttonRestart);
+  buttonStart_FE = (!buttonStart && prevbuttonStart);
+  buttonRestart_FE = (!buttonRestart && prevbuttonRestart);
+
 }
 
 void update_timers()
@@ -595,8 +611,13 @@ switch(currentStateSolve)
 
 void Test_FSM_Handler()
 {
+
+    Serial.print("State: ");
+    Serial.println(currentStateTest);
+
     // Declare 'type_of_node' once, outside the switch statement
     char type_of_node = robot.IRLine.detectNode();
+
     // Debugging output
     // Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
     // Serial.println();
@@ -605,7 +626,6 @@ void Test_FSM_Handler()
     static bool pushedL = false;  // Flag for Left turn state
     static bool pushedU = false;  // Flag for U-turn state
     static bool pushedF = false;  // Flag for Forward state
-
 
     switch (currentStateTest)
     {
@@ -670,7 +690,7 @@ void Test_FSM_Handler()
         Serial.print("-- Current state test = FORWARD \n");
         #endif
 
-        if(re_START_BUTTON == 1)
+        if(buttonStart_RE == 1)
         {
 
           #ifdef SUPERDEBUG

@@ -32,14 +32,14 @@
 #include "config.h"
 #include "robot.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 extern robot_t robot;
 
 IRLine_t::IRLine_t()
 {
   IR_WaterLevel = 0;
-  IR_tresh = 512;
+  IR_tresh = 750; //was 512
   cross_tresh = 3;
   black_cross_level = 2.8;
 }
@@ -198,6 +198,32 @@ char IRLine_t::detectNode( )
   {
     current_node = 'N';
   }
+  else
+  {
+    current_node = 'E';
+  }
+
+  if (current_node == last_node)
+  {
+    stability_count++;
+  }
+  else
+  {
+    stability_count = 0;
+    last_node = current_node;
+  }
+
+  if (stability_count >= required_stability)
+  {
+    #ifdef DEBUG
+    Serial.print("Node: ");
+    Serial.println(current_node);
+    #endif
+    return current_node;
+  }
+
+  // Return 'E' (Error/Unknown) until a node is stable enough
+  return 'E';
   else
   {
     current_node = 'E';

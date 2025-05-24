@@ -30,9 +30,15 @@
 #include "robot.h"
 #include "IRLine.h"
 #include "config.h"
+#include "IRLine.h"
+#include "config.h"
 
 robot_t robot;
 
+int nominal_speed = NOMINAL_SPEED;
+int follow_speed = FOLLOW_SPEED;
+
+//sets robot parameters
 int nominal_speed = NOMINAL_SPEED;
 int follow_speed = FOLLOW_SPEED;
 
@@ -49,6 +55,8 @@ robot_t::robot_t()
   follow_v = 0.20;
 }
 
+
+//for turning correctly (not used yet)
 
 //for turning correctly (not used yet)
 void robot_t::odometry(void)
@@ -82,6 +90,7 @@ void robot_t::odometry(void)
 
 
 //not used yet
+//not used yet
 void robot_t::accelerationLimit(void)
 {
   float dv = v_req - v;
@@ -94,6 +103,7 @@ void robot_t::accelerationLimit(void)
 }
 
 
+//not used yet
 //not used yet
 void robot_t::VWToMotorsVoltage(void)
 {
@@ -284,6 +294,23 @@ void robot_t::left_turn()
 
   void robot_t::u_turn()
   {
+      static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = nominal_speed;
+       PWM_2 = -nominal_speed;
+    }
+
+    if (millis() - start_time > 80) { // 833ms to turn ~180º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
+
+  }
+  void robot_t::reverse()
+  {
+    PWM_1 =  -nominal_speed;
+    PWM_2 = -nominal_speed;
       static unsigned long start_time = 0;
     if (start_time == 0) {
         start_time = millis();

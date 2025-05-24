@@ -31,6 +31,7 @@
 
 #include "Arduino.h"
 #include <string.h>
+#include <string.h>
 
 #define IRSENSORS_COUNT 5
 
@@ -40,6 +41,7 @@ class IRLine_t
     float pos_left, pos_right, total;
     int IR_values[IRSENSORS_COUNT];
     int IR_WaterLevel;
+    int IR_tresh = 850, IR_max;
     int IR_tresh = 850, IR_max;
 
     int crosses;
