@@ -12,6 +12,7 @@
 extern robot_t robot;
 
 stack<char> path_taken, solved_path;
+vector <char> movements_made;
 
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
