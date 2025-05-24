@@ -259,7 +259,7 @@ void robot_t::right_turn()
        PWM_2 = 0;
     }
 
-    if (millis() - start_time > 400) { // 435ms to turn ~90º
+    if (millis() - start_time > 800) { // 435ms to turn ~90º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }

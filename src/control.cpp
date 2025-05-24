@@ -757,7 +757,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-       else  if (type_of_node == 'N')  // Turn finished
+       else  if (type_of_node == 'N' && robot.END_TURN)  // Turn finished
         {
 
             #ifdef SUPERDEBUG
@@ -782,7 +782,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (type_of_node == 'N')  // Turn finished
+        else if (type_of_node == 'N' && robot.END_TURN)  // Turn finished
         {
 
             #ifdef SUPERDEBUG
@@ -808,7 +808,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (type_of_node == 'N') // U-turn finished
+        else if (type_of_node == 'N' && robot.END_TURN) // U-turn finished
         {
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = U_TURN_TEST (end_turn) \n");
