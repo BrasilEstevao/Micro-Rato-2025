@@ -28,15 +28,18 @@
 
 #include "IRLine.h"
 #include "Arduino.h"
+#include <string.h>
 #include "config.h"
 #include "robot.h"
+
+//#define DEBUG 1
 
 extern robot_t robot;
 
 IRLine_t::IRLine_t()
 {
   IR_WaterLevel = 0;
-  IR_tresh = 512;
+  IR_tresh = 750; //was 512
   cross_tresh = 3;
   black_cross_level = 2.8;
 }
@@ -99,31 +102,6 @@ void IRLine_t::calcIRLineEdgeRight(void)
 
 
 
-void IRLine_t::calcCrosses(void)
-{
-  blacks = 0;
-  
-  if (IR_max <= IR_tresh) {
-    cross_count = 0;
-    last_cross_count = 0;
-    return;
-  }
-  
-  last_cross_count = cross_count;
-  
-  blacks = total / IR_max;
-  if (blacks > black_cross_level) {
-    cross_count++;  
-    if (cross_count > 32) cross_count = 32;
-    if (last_cross_count < cross_tresh && cross_count >= cross_tresh) {
-      crosses++;  
-    }
-  } else {
-    if (cross_count > 0) cross_count--;
-  }
-}
-
-
 static void adc_set_channel(int channel)
 {
 	gpio_put_masked(digitalPinToBitMask(MUXA_PIN) | digitalPinToBitMask(MUXB_PIN) | digitalPinToBitMask(MUXC_PIN), channel << MUXA_PIN);
@@ -135,7 +113,6 @@ static void adc_set_channel(int channel)
 uint16_t read_adc(int channel)
 {
 	adc_set_channel(channel); // Switch external MUX to the desired channel
-	//delayMicroseconds(100);
   delayMicroseconds(100);
 	return analogRead(A2);    // The mux connects to analog input A2
 }
@@ -147,7 +124,7 @@ void IRLine_t::readIRSensors(void)
   {
     robot.IRLine.IR_values[(IRSENSORS_COUNT - 1) -c] = 1023 - read_adc(3 + c);
   }
-  Serial.println();
+  //Serial.println();
 }
 
 
@@ -182,21 +159,69 @@ void IRLine_t::printIRLine(void)
 }
 
 
-/*
-void IRLine_t::calcIRLineCenter(void)
-{
-  byte c;
-  int v;
 
-  IR_pos = 0;
-  IR_total = 0;
-  for (c = 0; c < 5; c++) {
-    v = IR_values[c] - IR_WaterLevel;
-    if (v < 0) v = 0;
- 
-    IR_total = IR_total + v;
-    IR_pos = IR_pos + v * (c - 2) * 16.0;
+//Node detection
+char IRLine_t::detectNode(void)
+{
+  static char last_node = 'E';
+  static int stability_count = 0;
+  const int required_stability = 80;  // number of consecutive identical readings
+
+  char current_node;
+
+  // left -> XXXOO
+  if (IR_values[0] > IR_tresh && IR_values[1] > IR_tresh && IR_values[2] > IR_tresh && IR_values[3] < IR_tresh && IR_values[4] < IR_tresh)
+  {
+    current_node = 'L';
   }
-  if (IR_total > 0) IR_pos = IR_pos / IR_total;
+  // right -> OOXXX
+  else if (IR_values[0] < IR_tresh && IR_values[1] < IR_tresh && IR_values[2] > IR_tresh && IR_values[3] > IR_tresh && IR_values[4] > IR_tresh)
+  {
+    current_node = 'R';
+  }
+  // T junction, Cross junction or End -> XXXXX
+  else if (IR_values[0] > IR_tresh && IR_values[1] > IR_tresh && IR_values[2] > IR_tresh && IR_values[3] > IR_tresh && IR_values[4] > IR_tresh)
+  {
+    current_node = 'B';
+  }
+  // After T or after U-Turn -> OOOOO
+  else if (IR_values[0] < IR_tresh && IR_values[1] < IR_tresh && IR_values[2] < IR_tresh && IR_values[3] < IR_tresh && IR_values[4] < IR_tresh)
+  {
+    current_node = 'W';
+  }
+  // Normal line
+  else if ((IR_values[0] < IR_tresh && IR_values[1] > IR_tresh && IR_values[2] < IR_tresh && IR_values[3] < IR_tresh && IR_values[4] < IR_tresh) || // OXOOO
+           (IR_values[0] < IR_tresh && IR_values[1] < IR_tresh && IR_values[2] < IR_tresh && IR_values[3] > IR_tresh && IR_values[4] < IR_tresh) || // OOOOX
+           (IR_values[0] < IR_tresh && IR_values[1] < IR_tresh && IR_values[2] > IR_tresh && IR_values[3] < IR_tresh && IR_values[4] < IR_tresh) || // OOOXO
+           (IR_values[0] > IR_tresh && IR_values[1] < IR_tresh && IR_values[2] < IR_tresh && IR_values[3] < IR_tresh && IR_values[4] < IR_tresh))   // XOOOO
+  {
+    current_node = 'N';
+  }
+  else
+  {
+    current_node = 'E';
+  }
+
+  if (current_node == last_node)
+  {
+    stability_count++;
+  }
+  else
+  {
+    stability_count = 0;
+    last_node = current_node;
+  }
+
+  if (stability_count >= required_stability)
+  {
+    #ifdef DEBUG
+    Serial.print("Node: ");
+    Serial.println(current_node);
+    #endif
+    return current_node;
+  }
+
+  // Return 'E' (Error/Unknown) until a node is stable enough
+  return 'E';
 }
-*/
+s

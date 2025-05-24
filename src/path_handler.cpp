@@ -2,18 +2,16 @@
 #include <string>
 #include <Arduino.h>
 
-//#define FOLLOW LEFT
-#define FOLLOW RIGHT
-// #define DEBUG
+#define FOLLOW LEFT
+//#define FOLLOW RIGHT
+//#define DEBUG
 
 using namespace std;
 
-stack<char> movements_made; // Stack to store movements made
-
 // Function to get the path from the original stack
 // This function will process the stack and return a new stack with the optimized path
-
-stack<char> get_path() {
+stack<char> get_path(stack <char> movements_made) 
+{
   stack<char> tempStack;
   bool changed = true;
     
@@ -36,52 +34,51 @@ stack<char> get_path() {
                 
         #ifdef FOLLOW LEFT 
         // Check for left-hand patterns 
-          if (pattern == "LUL") {
-            tempStack.push('F');
-            changed = true;
-          } else if (pattern == "FUL") {
-            tempStack.push('R');
-            changed = true;
-          } else if (pattern == "LUF") {
-            tempStack.push('R');
-            changed = true;
-          } else if (pattern == "RUL") {
-            tempStack.push('U');
-            changed = true;
-          } else if (pattern == "LUR") {
-            tempStack.push('U');
-            changed = true;
-          } else {
-            tempStack.push(first);
-            tempStack.push(second);
-            tempStack.push(third);
-          }
+        if (pattern == "LUL") {
+          tempStack.push('F');
+          changed = true;
+        } else if (pattern == "FUL") {
+          tempStack.push('R');
+          changed = true;
+        } else if (pattern == "LUF") {
+          tempStack.push('R');
+          changed = true;
+        } else if (pattern == "RUL") {
+          tempStack.push('U');
+          changed = true;
+        } else if (pattern == "LUR") {
+          tempStack.push('U');
+          changed = true;
+        } else {
+          tempStack.push(first);
+          tempStack.push(second);
+          tempStack.push(third);
+        }
         #endif
 
         #ifdef FOLLOW RIGHT
         // Check for right-hand patterns
-          if (pattern == "RUR") {
-            tempStack.push('F');
-            changed = true;
-          } else if (pattern == "FUR") {
-            tempStack.push('L');
-            changed = true;
-          } else if (pattern == "RUF") {
-            tempStack.push('L');
-            changed = true;
-          } else if (pattern == "LUR") {
-            tempStack.push('U');
-            changed = true;
-          } else if (pattern == "RUL") {
-            tempStack.push('U');
-            changed = true;
-          } else {
-            tempStack.push(first);
-            tempStack.push(second);
-            tempStack.push(third);
-          }
+        if (pattern == "RUR") {
+          tempStack.push('F');
+          changed = true;
+        } else if (pattern == "FUR") {
+          tempStack.push('L');
+          changed = true;
+        } else if (pattern == "RUF") {
+          tempStack.push('L');
+          changed = true;
+        } else if (pattern == "LUR") {
+          tempStack.push('U');
+          changed = true;
+        } else if (pattern == "RUL") {
+          tempStack.push('U');
+          changed = true;
+        } else {
+          tempStack.push(first);
+          tempStack.push(second);
+          tempStack.push(third);
+        }
         #endif
-               
       }
     }
         
@@ -123,7 +120,7 @@ stack<char> get_path() {
 
 // Function to save the last move made by the robot
 // This function will be called when the robot makes a move
-void save_move(char move)
+void save_move(char move, stack<char> movements_made)
 {
   // Save the move to the stack
   movements_made.push(move);
@@ -132,5 +129,19 @@ void save_move(char move)
     Serial.print("Move saved: ");
     Serial.println(move);
   #endif
-
 }
+
+// Function to print the path
+// void print_path()
+// {
+//   // Print the path from a copy of movements_made
+//   stack<char> tempStack = movements_made;  // Make a temporary copy to print the contents
+//   Serial.print("Path taken: ");
+//   while (!tempStack.empty()) {
+//     char c = tempStack.top();
+//     Serial.print(c);
+//     tempStack.pop();
+//   }
+//   Serial.println();
+// }
+

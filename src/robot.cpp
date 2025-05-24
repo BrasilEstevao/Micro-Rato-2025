@@ -28,9 +28,15 @@
 
 #include <Arduino.h>
 #include "robot.h"
+#include "IRLine.h"
+#include "config.h"
 
 robot_t robot;
 
+int nominal_speed = NOMINAL_SPEED;
+int follow_speed = FOLLOW_SPEED;
+
+//sets robot parameters
 robot_t::robot_t()
 {
   wheel_dist = 0.125;
@@ -43,6 +49,8 @@ robot_t::robot_t()
   follow_v = 0.20;
 }
 
+
+//for turning correctly (not used yet)
 void robot_t::odometry(void)
 {
   // Estimate wheels speed using the encoders
@@ -71,13 +79,9 @@ void robot_t::odometry(void)
 }
 
 
-void robot_t::setRobotVW(float Vnom, float Wnom)
-{
-  v_req = Vnom;
-  w_req = Wnom;
-}
 
 
+//not used yet
 void robot_t::accelerationLimit(void)
 {
   float dv = v_req - v;
@@ -90,6 +94,7 @@ void robot_t::accelerationLimit(void)
 }
 
 
+//not used yet
 void robot_t::VWToMotorsVoltage(void)
 {
   v1ref = v + w * wheel_dist / 2;
@@ -119,24 +124,88 @@ void robot_t::VWToMotorsVoltage(void)
  // }
 }
 
-// void robot_t::followLineRight(float Vnom, float K)
-// {
-//   w_req = K * IRLine.pos_right;
-//   //w_req = w_req * fabs(w_req);
-//   //v_req = fmax(0, Vnom - 0.1 * fabs(w_req));
-//   v_req = Vnom;
-// }
+
+void robot_t::setMotorPWM(int new_PWM, int pin_a, int pin_b)
+{
+  int PWM_max = 200;
+  if (new_PWM >  PWM_max) new_PWM =  PWM_max;
+  if (new_PWM < -PWM_max) new_PWM = -PWM_max;
+  
+  if (new_PWM == 0) 
+  {  // Both outputs 0 -> A = H, B = H
+    analogWrite(pin_a, 255);
+    analogWrite(pin_b, 255);
+
+  } else if (new_PWM > 0) 
+  {
+    analogWrite(pin_a, 255 - new_PWM);
+    analogWrite(pin_b, 255);
+
+  } 
+  else 
+  {
+    analogWrite(pin_a, 255);
+    analogWrite(pin_b, 255 + new_PWM);
+  }
+}
 
 
-// void robot_t::followLineLeft(float Vnom, float K)
-// {
-//   w_req = K * IRLine.pos_left;
-//   //w_req = w_req * fabs(w_req);
-//   //v_req = fmax(0, Vnom - 0.1 * fabs(w_req));
-//   v_req = Vnom;
-// }
 
 
+
+int robot_t::IR_sum()
+{
+  return IRLine.IR_values[0] + IRLine.IR_values[1] + IRLine.IR_values[2] + IRLine.IR_values[3] + IRLine.IR_values[4];
+}
+
+
+ void robot_t::followLine() 
+ {
+    int IR_tresh = robot.IRLine.IR_tresh;
+    
+    if (robot.IR_sum() < 2500) {
+        
+        error = -1.1 * IRLine.IR_values[0] - 1.0 * IRLine.IR_values[1] + 1.0 * IRLine.IR_values[3] + 1.1 * IRLine.IR_values[4];
+
+        
+        integral += error;
+        derivative = error - prevError;
+        prevError = error;
+
+        
+        int correction  = (IRkp * error + IRki * integral + IRkd * derivative); //PID constants are defined in robot.h
+
+       
+        if (correction > 100) correction = 100; // Max correction limit
+        else if (correction < -100) correction = -100; // Min correction limit
+
+        // Apply the PID correction to the motor PWM values
+        int right_PWM = follow_speed - correction; // Subtract from left motor
+        int left_PWM = follow_speed + correction; // Add to right motor
+
+        //Serial.printf(" %d ", correction);
+        // Apply the PWM values to the motors
+        PWM_1 = left_PWM;
+        PWM_2 = right_PWM;
+     
+    }
+    else 
+    {
+      integral = 0;
+      PWM_1 = follow_speed;
+      PWM_2 = follow_speed;
+    }
+    
+    if(IRLine.IR_values[0] < IR_tresh && IRLine.IR_values[1] < IR_tresh && IRLine.IR_values[2] < IR_tresh && IRLine.IR_values[3] < IR_tresh && IRLine.IR_values[4] < IR_tresh)
+    {
+      stop(); 
+    }
+}
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//node functions
 
 void robot_t::stop()
 {
@@ -144,66 +213,60 @@ void robot_t::stop()
   robot.PWM_2 = 0; 
 }
 
+void robot_t::right_turn()
+{
+  static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = nominal_speed;
+       PWM_2 = 0;
+    }
 
-// void robot_t::followLine()
-// {
-//   // robot.IRkp = 0.1;
-//   // robot.IRki = 0.02;
-//   // robot.IRkd = 0.1;
-
-//   if(robot.IR_sum() < 2500){
-//     error = -1.1 * IRLine.IR_values[0] - 1.0 * IRLine.IR_values[1] + 1.0 * IRLine.IR_values[3] + 1.1 * IRLine.IR_values[4];
-
-//     integral += error;
-//     derivative = error - prevError;
-//     prevError = error;
-
-//     output_w = (robot.IRkp * error + robot.IRki * integral + robot.IRkd * derivative)/10000;
-
-//     //Serial.printf("Output_w = %f\n",output_w);
-//     if (output_w > 3.5) output_w = 3.5;
-//     else if (output_w < -3.5) output_w = -3.5;
-
-//     // Serial.print(">Output_w:");
-//     // Serial.println(robot.output_w);
-
-//     // Aplicação das saídas
-//     setRobotVW(robot.follow_v, output_w);
-//   }
-//   else {
-//     integral = 0;
-//     setRobotVW(robot.follow_v, 0);
-//   }
-// }
+    if (millis() - start_time > 600) { // 435ms to turn ~90º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
+}
 
 
 
+void robot_t::left_turn()
+{
+  static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = 0;
+       PWM_2 = nominal_speed;
+    }
 
- void robot_t::left_turn()
- {
+    if (millis() - start_time > 600) { // 435ms to turn ~90º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
+}
 
- }
-  void robot_t::right_turn()
-  {
-
-  }
   void robot_t::u_turn()
   {
+      static unsigned long start_time = 0;
+    if (start_time == 0) {
+        start_time = millis();
+       PWM_1 = nominal_speed;
+       PWM_2 = -nominal_speed;
+    }
+
+    if (millis() - start_time > 80) { // 833ms to turn ~180º
+        END_TURN = true;
+        start_time = 0; // reset for next turn
+    }
 
   }
-  void robot_t::reverse(int leftPWM, int rightPWM)
+  void robot_t::reverse()
   {
-    robot,PWM_1 = leftPWM;
-    robot,PWM_2 = rightPWM;
+    PWM_1 =  -nominal_speed;
+    PWM_2 = -nominal_speed;
   }
-  void robot_t::forward( int leftPWM, int rightPWM)
+  void robot_t::forward( )
   {
-    robot,PWM_1 = leftPWM;
-    robot,PWM_2 = rightPWM;
+    PWM_1 =  nominal_speed;
+    PWM_2 = nominal_speed;
   }
-
-
-// int robot_t::IR_sum()
-// {
-//   return IRLine.IR_values[0] + IRLine.IR_values[1] + IRLine.IR_values[2] + IRLine.IR_values[3] + IRLine.IR_values[4];
-// }

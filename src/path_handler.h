@@ -21,7 +21,7 @@ using namespace std;
  * @return A new stack containing the optimized path.
  */
 
-stack<char> get_path();
+stack<char> get_path(stack<char> movements_made);
 
 /**
  * @brief Saves the move made by the robot to a stack.
@@ -30,7 +30,19 @@ stack<char> get_path();
  * 
  * @param move The move character to be saved (e.g., 'F', 'L', 'R', etc.).
  */
-void save_move(char move);
+void save_move(char move, stack<char> movements_made);
+
+
+/**
+ * @brief Retrieves the next move from the stack of movements made.
+ *  
+ * This function removes and returns the top move from the stack of movements made.
+ * 
+ * @return The move character that was removed from the stack.
+ */
+
+char get_move();
+
+void print_path();
 
 #endif // GET_PATH_H    
-

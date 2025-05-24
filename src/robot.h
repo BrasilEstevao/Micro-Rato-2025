@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <math.h>
 //#include "PID.h"
-//#include "IRLine.h"
+#include "IRLine.h"
 #include "state_machines.h"
 
 #ifndef NUM_WHEELS
@@ -19,8 +19,9 @@ typedef enum {
 
 class robot_t {
   public:
+
+  //encoder stuff
   int enc1, enc2;
-  int Senc1, Senc2;
   float w1e, w2e;
   float v1e, v2e;
   float ve, we;
@@ -28,9 +29,12 @@ class robot_t {
   float rel_s, rel_theta;
   float xe, ye, thetae;
 
-  byte state;
-  uint32_t tis, tes;
-  
+
+  //turning flags
+  bool END_TURN = false;
+  unsigned long turn_start_time = 0;
+  bool is_turning = false;
+
   float dt;
   float v, w;
   float v_req, w_req;
@@ -43,9 +47,10 @@ class robot_t {
   float u1, u2;
   int PWM_1, PWM_2;
   int PWM_1_req, PWM_2_req;
-    control_mode_t control_mode;
+  control_mode_t control_mode;
 
-  double  IRkp = 8, IRki = 0.02, IRkd = 6;
+  double  IRkp = 0.3, IRki = 0, IRkd =0.6 ;
+  //d =0.35 and 120 good
   double lastIRkp = IRkp, lastIRki = IRki, lastIRkd = IRkd;
 
   double error;         // Error
@@ -62,40 +67,38 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   //PID_t PID[NUM_WHEELS];
   float battery_voltage;
   int button_state;
-
-  int solenoid_PWM;
-
-  //IRLine_t IRLine;
-  float tof_dist, prev_tof_dist;
-
-  int LastTouchSwitch, TouchSwitch;
-  
+  IRLine_t IRLine;  
   
   robot_t();
 
-   void setState(byte new_state);
-
   void odometry(void);
-  void setRobotVW(float Vnom, float Wnom);
 
+  void setRobotVW(float Vnom, float Wnom);
   void accelerationLimit(void);
   void VWToMotorsVoltage(void);
+
+  void setMotorPWM(int new_PWM, int pin_a, int pin_b);
  
 
   void followLineRight(float Vnom, float K);
   void followLineLeft(float Vnom, float K);
-  void stop();
   void followLine();
+
+  //node functions
+
+  void stop();
   void left_turn();
   void right_turn();
   void u_turn();
-  void reverse(int leftPWM, int rightPWM);
-  void forward(int leftPWM, int rightPWM);
+  void reverse();
+  void forward();
 
 
   int IR_sum();
 };
 
+
 extern robot_t robot;
+
 
 #endif // ROBOT_H
