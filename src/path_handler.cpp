@@ -131,17 +131,17 @@ void save_move(char move, stack<char> movements_made)
   #endif
 }
 
-// Function to print the path
-// void print_path()
-// {
-//   // Print the path from a copy of movements_made
-//   stack<char> tempStack = movements_made;  // Make a temporary copy to print the contents
-//   Serial.print("Path taken: ");
-//   while (!tempStack.empty()) {
-//     char c = tempStack.top();
-//     Serial.print(c);
-//     tempStack.pop();
-//   }
-//   Serial.println();
-// }
+ //Function to print the path
+ void print_path(stack<char> stack_to_print)
+ {
+   // Print the path from a copy of movements_made
+   stack<char> tempStack = stack_to_print;  // Make a temporary copy to print the contents
+   Serial.print("Path taken: ");
+   while (!tempStack.empty()) {
+     char c = tempStack.top();
+     Serial.print(c);
+     tempStack.pop();
+   }
+   Serial.println();
+ }
 

@@ -43,6 +43,6 @@ void save_move(char move, stack<char> movements_made);
 
 char get_move();
 
-void print_path();
+void print_path(stack<char> stack_to_print);
 
 #endif // GET_PATH_H    

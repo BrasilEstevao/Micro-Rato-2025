@@ -721,6 +721,7 @@ void Test_FSM_Handler()
               if (type_of_node == 'B')  // Black, End of path
             { 
                 currentStateTest = END_TEST;
+
             }
             else if (type_of_node == 'N')  // Cross or Right T junction
             { 
@@ -881,6 +882,7 @@ void Test_FSM_Handler()
         #ifdef DEBUG
         Serial.printf("-- Current state test = END \n");
         #endif
+        print_path(path_taken);
 
         robot.END_TURN = false;
         END_MAP = true;
