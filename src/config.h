@@ -27,9 +27,9 @@
 
 #define NOMINAL_SPEED  FOLLOW_SPEED +40  //0-255 directly to motors PWM
 
-#define FOLLOW_SPEED   80//0-255 directly to motors PWM
+#define FOLLOW_SPEED   50//0-255 directly to motors PWM
 //tested values
-//120 best one
+//80
 
 
 

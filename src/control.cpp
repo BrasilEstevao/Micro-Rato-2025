@@ -23,6 +23,8 @@ bool END_MAP = false;
 bool END_SOLVE = false;
 
 bool cross=false;
+int turn_stability = 40;
+char pastNode = '0';
 static unsigned long forwardStartTime = 0;
 
 
@@ -610,8 +612,8 @@ switch(currentStateSolve)
 void Test_FSM_Handler()
 {
     // Declare 'type_of_node' once, outside the switch statement
-    char type_of_node = robot.IRLine.detectNode();
-
+    char type_of_node = robot.IRLine.detectNode(pastNode);
+    pastNode = type_of_node;
     // Debugging output
     // Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
     // Serial.println();
@@ -761,7 +763,7 @@ void Test_FSM_Handler()
         #ifdef DEBUG
         Serial.printf("-- Current state test = RIGHT_TURN \n");
         #endif
-
+        
         if (re_START_BUTTON == 1)
         {
 
@@ -786,7 +788,7 @@ void Test_FSM_Handler()
         #ifdef DEBUG
         Serial.printf("-- Current state test = LEFT_TURN \n");
         #endif
-
+       
         if (re_START_BUTTON == 1)
         {
 
@@ -796,7 +798,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (type_of_node == 'N')  // Turn finished
+        else if (robot.IRLine.detectNode(turn_stability) == 'N')  // Turn finished
         {
 
             #ifdef SUPERDEBUG
@@ -812,7 +814,7 @@ void Test_FSM_Handler()
         #ifdef DEBUG
         Serial.print("-- Current state test = U_TURN \n");
         #endif
-
+        
         if (re_START_BUTTON == 1)
         {
 
@@ -822,7 +824,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (robot.IRLine.detectNode() == 'N') // U-turn finished
+        else if (robot.IRLine.detectNode(turn_stability) == 'N') // U-turn finished
         {
 
             #ifdef SUPERDEBUG
