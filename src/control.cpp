@@ -645,7 +645,6 @@ void Test_FSM_Handler()
               #ifdef SUPERDEBUG
               Serial.printf("-- Current state test = FOLLOW_TEST (L) \n");
               #endif
-              path_taken.push('L');
               currentStateTest = LEFT_TURN_TEST;
           } 
           else if (type_of_node == 'W') {
@@ -682,8 +681,7 @@ void Test_FSM_Handler()
         { 
           if(!pushedF)
           {
-            path_taken.push('F');
-            Serial.println("Pushed F");
+            //path_taken.push('F');
             pushedF = true;
           }
 
@@ -723,11 +721,13 @@ void Test_FSM_Handler()
             }
             else if (type_of_node == 'N')  // Cross or Right T junction
             { 
+              path_taken.push('F');
               currentStateTest = FOLLOW_TEST;
 
                if(cross == true)
                {
                 cross = false;
+                path_taken.pop();
                 currentStateTest = BACKWARD_TEST;
                }
                 
@@ -763,6 +763,7 @@ void Test_FSM_Handler()
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = RIGHT_TURN_TEST \n");
             #endif
+            path_taken.push('R');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
@@ -788,6 +789,7 @@ void Test_FSM_Handler()
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = LEFT_TURN_TEST \n");
             #endif
+            path_taken.push('L');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
@@ -813,6 +815,7 @@ void Test_FSM_Handler()
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = U_TURN_TEST (end_turn) \n");
             #endif
+            path_taken.push('U');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
