@@ -8,12 +8,16 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 
 #define DEBUG 1
+#include "path_handler.h"
+
+//#define DEBUG 1
 
 
-/*
+
 void init_PIO_dual_encoders(int enc1_pin_A, int enc2_pin_A);
 int read_PIO_encoder(int sm);
-*/
+
+
 
 
 void setup()
@@ -53,6 +57,8 @@ void setup()
   analogReadResolution(10);
 
   Serial.println("Setup complete. Starting main loop...");
+  //Initialize the robot stopped
+  currentStateTest = STOP_TEST;
   
 }
 
@@ -69,24 +75,26 @@ void loop() {
 
   robot.IRLine.readIRSensors();
   //robot.IRLine.printIRLine();
-  robot.PWM_1= 100;
-  robot.PWM_2= 100;
+  robot.PWM_1= 100; //testando
+  robot.PWM_2= 100; //motores
 
   robot.setMotorSpeed(robot.motor_L, robot.PWM_1);
   //robot.setMotorSpeed(robot.motor_R, robot.PWM_2);
   printf("cpt 2\n");
 
-  edge_detection();
-  update_timers();
-  // printf("cpt 3");
-  //main_FSM_Handler();
-  // Map_FSM_Handler();
-  // Solve_FSM_Handler();
-  //Test_FSM_Handler();
 
-  // Serial.printf("PWM1: %d\n",robot.PWM_1);
-  // Serial.printf("PWM2%d\n",robot.PWM_2);
-  delay(250);
+	  edge_detection();
+
+
+    // Main_FSM_Handler();
+    // Map_FSM_Handler();
+    // Solve_FSM_Handler();
+    Test_FSM_Handler();
+
+    // Serial.printf("PWM1: %d\n",robot.PWM_1);
+    // Serial.printf("PWM2%d\n",robot.PWM_2);
+   
+    delay(100);
 } 
 
 

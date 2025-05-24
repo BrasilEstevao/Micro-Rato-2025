@@ -1,24 +1,28 @@
-#define RUN 
+//#define RUN 
 #define TEST 1
-
-#define DEBUG 1
+//#define DEBUG 1
+//#define SUPERDEBUG 1
 
 #include <Arduino.h>
 #include <Adafruit_MotorShield.h>
 #include "state_machines.h"
 #include "robot.h"
+#include "path_handler.h"
 
 
-extern robot_t robot; 
+extern robot_t robot;
+
+stack<char> path_taken, solved_path;
 
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
 StateNamesSolve currentStateSolve = IDLE_SOLVE;
-StateNamesTest currentStateTest = STOP_TEST;
+StateNamesTest currentStateTest = FOLLOW_TEST;
 
 // Variáveis globais
 bool END_MAP = false;
 bool END_SOLVE = false;
+
 
 
 //edge detection variables
@@ -28,10 +32,14 @@ int re_START_BUTTON = 0;
 
 
 
+
+
 // Cycle time variables
 unsigned int start_time = 0, end_time = 0, cycle_time = 0;
 
 // Timers (exemplo)
+
+
 
 
 // timerBlock timer_Exampler;
@@ -53,7 +61,7 @@ void init_ST()
 
 void edge_detection()
 {
-    bool currentButtonState = digitalRead(START_BUTTON);
+    bool currentButtonButtonState = digitalRead(START_BUTTON);
 
     //if ((millis() - lastDebounceTime) > debounceDelay) {
         if (!p_START_BUTTON && currentButtonState) {
@@ -250,8 +258,8 @@ void Map_FSM_Handler()
 				#ifdef DEBUG
 				printf("-- Current state map = FOLLOW_LINE\n");
 				#endif
-/*
-				if(detect_all_white()) 
+
+				if(detect_all_white()) //OOOOO
 				{
 					currentStateMap = U_TURN;
 				}
@@ -265,7 +273,7 @@ void Map_FSM_Handler()
         {
           currentStateMap = LEFT_TURN_MAP;
         }
-*/
+
       break;
 
 
@@ -274,12 +282,12 @@ void Map_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state map = U_TURN\n");
         #endif
-/*
-				if(END_U_TURN)
+
+				if(robot.END_TURN)
 				{
           currentStateMap = FOLLOW_LINE_MAP;
 				}
-*/
+
 			break;
 
 
@@ -288,30 +296,44 @@ void Map_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state map = LEFT_TURN\n");
         #endif
-/*
-        if(END_LEFT_TURN)
+
+        if(robot.END_TURN)
         {
           currentStateMap = FOLLOW_LINE_MAP;
         }
-*/
+
       break;
+
+      case RIGHT_TURN_MAP:
+
+        #ifdef DEBUG
+        printf("-- Current state map = RIGHT_TURN\n");
+        #endif
+
+        if(robot.END_TURN)
+        {
+          currentStateMap = FOLLOW_LINE_MAP;
+        }
+
+      break;
+
 
       case SMALL_FORWARD:
 
         #ifdef DEBUG
         printf("-- Current state map = SMALL_FORWARD\n");
         #endif
-				/*
+				
         if(detect_forward()) //OOXOO
         {
-          currentStateMap = FORWARD_MAP;
+          currentStateMap = FOLLOW_LINE_MAP;
         }
 
         if(detect_all_black()) //XXXXX
         {
           currentStateMap = END;
         }
-*/
+
 			break;
 
       case FORWARD_MAP:
@@ -358,49 +380,47 @@ switch(currentStateMap)
     case FOLLOW_LINE_MAP:
         //follow_line funtion
 
-        robot.followLine(); //mudar;
+        robot.followLine(); 
         //Only real use of the PID
         break;
 
     case U_TURN:
         //U-turn function 
-        robot.u_turn();// mudar;
+        robot.u_turn();
         //Just angular speed until -180 degrees (use encoders)
         break;
 
     case LEFT_TURN_MAP:
         //left_turn function 
-        robot.left_turn(); //mudar;
+        robot.left_turn();
         //Just angular speed until -90 degrees (use encoders)
         break;
 
     case RIGHT_TURN_MAP:
         //right_turn function
-        robot.right_turn();// mudar;
+        robot.right_turn();
         //Just angular speed until 90 degrees (use encoders)
         break;
 
     case REVERSE:
         //reverse function 
-        robot.reverse(); //mudar;
+        robot.reverse();
         //activate motors in oposite until see line (in this case, since its always turning left, it will see either OOXXX or OOXOO)
         break;
 
     case SMALL_FORWARD:
         //small_forward function (maybe just forward function but with timer)
-        robot.forward(); //mudar;
+        robot.forward();
         break;
 
     case FORWARD_MAP:
         //forward function (go forward until OOXOO)
-        robot.forward(); //mudar;
+        robot.forward();
         break;
 
     case END:
-        //run solving algorithm on path taken
        // solve_algorithm();
-        //stop robot
-        robot.stop(); //mudar;
+        robot.stop();
         break;
 
     default:
@@ -447,11 +467,11 @@ void Solve_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state solve = FOLLOW_LINE\n");
         #endif
-/*
+
         if(Detect_node)
         {
           currentStateSolve  = GET_INSTRUCTION;
-        }*/
+        }
 			break;
 
 
@@ -462,7 +482,7 @@ void Solve_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state solve = GET_INSTRUCTION\n");
         #endif
-/*
+
 				if(instruction == 'R')
 				{
 					currentStateSolve = RIGHT_TURN_SOLVE;
@@ -481,7 +501,7 @@ void Solve_FSM_Handler()
         if(instructions.empty())
         {
           currentStateSolve = FINISH;
-        }*/
+        }
 
 			break;
 
@@ -493,11 +513,11 @@ void Solve_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state solve = RIGHT_TURN_SOLVE\n");
         #endif
-/*
+
         if(back_on_line)
         {
           currentStateSolve = FOLLOW_LINE_SOLVE;
-        }*/
+        }
 
 			break;
 
@@ -508,16 +528,26 @@ void Solve_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state solve = LEFT_TURN_SOLVE\n");
         #endif
-/*
+
         if(back_on_line)
         {
           currentStateSolve = FOLLOW_LINE_SOLVE;
-        }*/
+        }
 
       break;
 
       case FORWARD_SOLVE:
 
+        #ifdef DEBUG
+        printf("-- Current state solve = FORWARD_SOLVE\n");
+        #endif
+
+        if(OOXOO)
+        {
+          currentStateSolve = FOLLOW_LINE_SOLVE;
+        }
+
+      break;
         #ifdef DEBUG
         printf("-- Current state solve = FORWARD_SOLVE\n");
         #endif
@@ -552,11 +582,11 @@ void Solve_FSM_Handler()
 switch(currentStateSolve)
     {
     case IDLE_SOLVE:
-        //stop robot
+        robot.stop();
         break;
 
     case FOLLOW_LINE_SOLVE:
-        //follow_line function
+        robot.followLine();
         break;
 
     case GET_INSTRUCTION:
@@ -566,21 +596,19 @@ switch(currentStateSolve)
         break;
 
     case RIGHT_TURN_SOLVE:
-        //right_turn function
-        //same as the one used in mapping
+        robot.right_turn();
         break;
 
     case LEFT_TURN_SOLVE:
-        //left_turn function
-        //same as the one used in mapping
+        robot.left_turn();
         break;
 
     case FORWARD_SOLVE:
-        //forward function
+        robot.forward();
         break;
 
     case FINISH:
-        //stop robot / or any finish task
+        robot.stop();
         break;
 
     default:
@@ -591,139 +619,373 @@ switch(currentStateSolve)
 
 #endif
 
-#ifdef TEST
 
 void Test_FSM_Handler()
 {
+    // Declare 'type_of_node' once, outside the switch statement
+    char type_of_node = robot.IRLine.detectNode();
 
+    // Debugging output
+    // Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
+    // Serial.println();
 
-	static bool next_turn_left = true;
+    static bool pushedR = false;  // Flag for Right turn state
+    static bool pushedL = false;  // Flag for Left turn state
+    static bool pushedU = false;  // Flag for U-turn state
+    static bool pushedF = false;  // Flag for Forward state
 
-
-	// Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
-	// Serial.println();
-
-    switch(currentStateTest)
+    switch (currentStateTest)
     {
-    case FORWARD_TEST:
+      case FOLLOW_TEST:
+          #ifdef DEBUG
+          Serial.print("-- Current state test = FOLLOW \n");
+          #endif
 
-    #ifdef DEBUG
-        Serial.print("-- Current state test = FORWARD\n");
+          // Reset push flags so each state can push only once during its activation
+          pushedR = false;
+          pushedL = false;
+          pushedU = false;
+          pushedF = false;
+
+          if (re_START_BUTTON == 1)
+          {
+            #ifdef SUPERDEBUG
+          Serial.printf("-- Current state test =  FOLLOW_TEST (re_START_BUTTON) \n");
+          #endif
+              currentStateTest = STOP_TEST;
+          }
+
+
+          if (type_of_node == 'R')
+          {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (R) \n");
+              #endif
+              currentStateTest = SMALL_FORWARD_TEST;
+          } 
+          else if (type_of_node == 'L') {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (L) \n");
+              #endif
+              currentStateTest = LEFT_TURN_TEST;
+          } 
+          else if (type_of_node == 'W') {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (W) \n");
+              #endif
+              currentStateTest = U_TURN_TEST;
+          } 
+          else if (type_of_node == 'B') {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (B) \n");
+              #endif
+              currentStateTest = SMALL_FORWARD_TEST;
+          }
+          break;
+          
+      case FORWARD_TEST:
+        #ifdef DEBUG
+        Serial.print("-- Current state test = FORWARD \n");
         #endif
 
         if(re_START_BUTTON == 1)
         {
-          currentStateTest = BACWARD_TEST;
-        }
-        break;
 
-
-	case RIGHT_TURN_TEST:
-
-	#ifdef DEBUG
-		Serial.printf("-- Current state test = RIGHT_TURN  and next_turn_left = %d\n", next_turn_left);
-		#endif
-
-		
-
-		if(robot.END_TURN == true) //signal from right turn function that means it has finished turning
-		{
-			currentStateTest = STOP_TEST;
-			robot.END_TURN = false;
-			next_turn_left = true;
-		}
-		break;
-
-	case LEFT_TURN_TEST:
-
-	#ifdef DEBUG
-		Serial.printf("-- Current state test = LEFT_TURN and next_turn_left = %d\n", next_turn_left);
-		#endif
-
-		
-
-		if(robot.END_TURN == true ) //signal from left turn function that means it has finished turning
-		{
-			currentStateTest = STOP_TEST;
-			robot.END_TURN = false;
-			next_turn_left = false;
-		}
-		break;
-
-	case U_TURN_TEST:
-
-	#ifdef DEBUG
-		Serial.print("-- Current state test = U_TURN\n");
-		#endif
-
-		if(robot.END_TURN == true) //signal from u turn function that means it has finished turning
-		{
-			currentStateTest = STOP_TEST;
-			robot.END_TURN = false;
-		}
-		break;
-
-    case BACWARD_TEST:
-
-    #ifdef DEBUG
-        Serial.print("-- Current state test = BACKWARD\n");
-        #endif
-
-
-        if(re_START_BUTTON == 1)
-        {
+          #ifdef SUPERDEBUG
+          Serial.printf("-- Current state test = FORWARD_TEST \n");
+          #endif
           currentStateTest = STOP_TEST;
         }
+        else if(type_of_node == 'N')  // Black, End of path
+        { 
+          if(!pushedF)
+          {
+            path_taken.push('F');
+            Serial.println("Pushed F");
+            pushedF = true;
+          }
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = FORWARD_TEST \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+        }
         break;
 
-		case STOP_TEST:
+         case SMALL_FORWARD_TEST:
+        #ifdef DEBUG
+        Serial.print("-- Current state test = SMALL_FORWARD\n");
+        #endif
 
-			#ifdef DEBUG
-			Serial.printf("-- Current state test = STOP and next turn left = %d\n", next_turn_left);
-			#endif
+        // Check if enough time has passed or if the robot has moved a small distance.
+        static unsigned long forwardStartTime = 0;
+        static bool hasMovedEnough = false;
 
-			robot.END_TURN = false; // extra safety
+        if (forwardStartTime == 0) 
+        {
+            // First time entering SMALL_FORWARD_TEST, start the timer
+            forwardStartTime = millis();
+        }
 
-			if(re_START_BUTTON == 1 && next_turn_left)
-			{
-				currentStateTest = LEFT_TURN_TEST;
-			}
-			else if(re_START_BUTTON == 1 && !next_turn_left)
-			{
-				currentStateTest = RIGHT_TURN_TEST;
-			}
+        // Check if the robot has moved forward long enough (adjust time as necessary)
+        if (millis() - forwardStartTime > 100) { // 1000 ms = 1 second, adjust this as needed
+            hasMovedEnough = true;
+        }
 
-				break;
-	}
+        if (hasMovedEnough) 
+        {
+            // Check the node type after moving a little further
+          
+              if (type_of_node == 'B')  // Black, End of path
+            { 
+                currentStateTest = END_TEST;
+            }
+            else if (type_of_node == 'N')  // Cross or Right T junction
+            { 
+                if (!pushedF)  // Only push 'F' if not already pushed for this state
+                {
+                    path_taken.push('F');
+                    pushedF = true;  // Set the flag to prevent pushing again
+                }
+                currentStateTest = FOLLOW_TEST;
+            }
+            else if (type_of_node == 'W')  // White, U-turn
+            { 
+                currentStateTest = BACKWARD_TEST;
+            }
+
+            forwardStartTime = 0;  // Reset the timer
+            hasMovedEnough = false; // Reset the movement condition
+        }
+
+        break;
+
+      case RIGHT_TURN_TEST:
+        #ifdef DEBUG
+        Serial.printf("-- Current state test = RIGHT_TURN \n");
+        #endif
+
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = RIGHT_TURN_TEST \n");
+            #endif
+            currentStateTest = STOP_TEST;
+        }
+
+       else  if (robot.END_TURN == true )  // Turn finished
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = RIGHT_TURN_TEST \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+            robot.END_TURN = false;
+        }
+        break;
+
+      case LEFT_TURN_TEST:
+        #ifdef DEBUG
+        Serial.printf("-- Current state test = LEFT_TURN \n");
+        #endif
+
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = LEFT_TURN_TEST \n");
+            #endif
+            currentStateTest = STOP_TEST;
+        }
+
+        else if (robot.END_TURN == true)  // Turn finished
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = LEFT_TURN_TEST \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+            robot.END_TURN = false;
+        }
+        break;
+
+      case U_TURN_TEST:
+
+        #ifdef DEBUG
+        Serial.print("-- Current state test = U_TURN \n");
+        #endif
+
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = U_TURN_TEST (start_button)\n");
+            #endif
+            currentStateTest = STOP_TEST;
+        }
+
+        else if (robot.IRLine.detectNode() == 'N') // U-turn finished
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = U_TURN_TEST (end_turn) \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+            robot.END_TURN = false;
+        }
+        break;
+
+      case BACKWARD_TEST:
+        #ifdef DEBUG
+        Serial.print("-- Current state test = BACKWARD \n");
+        #endif
+
+        type_of_node = robot.IRLine.detectNode();
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = BACKWARD_TEST \n");
+            #endif
+            currentStateTest = STOP_TEST;
+        }
+
+        else if (type_of_node == 'R')  // Reversing until find right turn
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = BACKWARD_TEST \n");
+            #endif
+            currentStateTest = RIGHT_TURN_TEST;
+        }
+
+        else if (type_of_node == 'B')  // Reversing until find T junction
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = BACKWARD_TEST \n");
+            #endif
+            currentStateTest = LEFT_TURN_TEST;
+        }
+    
+        break;
+
+      case STOP_TEST:
+        #ifdef DEBUG
+        Serial.printf("-- Current state test = STOP  \n");
+        #endif
+
+        robot.END_TURN = false;
+
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = STOP_TEST \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+        }
+
+        break;
+
+      case END_TEST:
+        #ifdef DEBUG
+        Serial.printf("-- Current state test = END \n");
+        #endif
+
+        robot.END_TURN = false;
+
+        if (re_START_BUTTON == 1)
+        {
+
+            #ifdef SUPERDEBUG
+            Serial.printf("-- Current state test = END_TEST \n");
+            #endif
+            currentStateTest = FOLLOW_TEST;
+        }
+
+        break;
+    }
+
+
+
+    //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
 
     // Update outputs
-
-    switch(currentStateTest)
+    switch (currentStateTest)
     {
-    case FORWARD_TEST:
+      case FOLLOW_TEST:
+        robot.followLine();
+        break;
+
+      case FORWARD_TEST:
         robot.forward();
         break;
 
-	case RIGHT_TURN_TEST:
-		robot.right_turn();
-		break;
+      case SMALL_FORWARD_TEST:
+        robot.forward();
+        break;
 
-	case LEFT_TURN_TEST:
-		robot.left_turn();
-		break;
+      case RIGHT_TURN_TEST:
 
-	case U_TURN_TEST:
-		robot.u_turn();
-		break;
+         if (!pushedR)  // Only push 'R' if not already pushed for this state
+            {
+                path_taken.push('R');
+                Serial.println("Pushed R");
+                pushedR = true;  // Set the flag to prevent pushing again
+         }
+        robot.right_turn();
+        break;
 
-    case BACWARD_TEST:
+      case LEFT_TURN_TEST:
+
+         if (!pushedL)  // Only push 'R' if not already pushed for this state
+            {
+                path_taken.push('L');
+                pushedR = true;  // Set the flag to prevent pushing again
+            }
+        robot.left_turn();
+        break;
+
+      case U_TURN_TEST:
+        if(!pushedU)  // Only push 'F' if not already pushed for this state
+            {
+                path_taken.push('U');
+                Serial.println("Pushed U");
+                pushedU = true;  // Set the flag to prevent pushing again
+            }
+        robot.u_turn();
+        break;
+
+      case BACKWARD_TEST:
         robot.reverse();
         break;
 
-	case STOP_TEST:
-		robot.stop();
-		break;
-    }
-  }
+      case STOP_TEST:
+        robot.stop();
+        break;
+        
 
-#endif
+      case END_TEST:
+        // #ifdef DEBUG
+        // Serial.printf("-- Current state test = END \n");
+        // #endif
+
+        robot.stop();
+        solved_path = get_path(path_taken);  // Process the path once the test is over
+        Serial.print("Taken Path: ");
+        while (!path_taken.empty()) {
+            char c = path_taken.top();
+            Serial.print(c);
+            path_taken.pop();
+        }
+        break;
+    }
+}
