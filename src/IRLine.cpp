@@ -224,4 +224,3 @@ char IRLine_t::detectNode(void)
   // Return 'E' (Error/Unknown) until a node is stable enough
   return 'E';
 }
-s

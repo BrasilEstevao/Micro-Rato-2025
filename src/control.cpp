@@ -626,6 +626,9 @@ void Test_FSM_Handler()
     switch (currentStateTest)
     {
       case FOLLOW_TEST:
+
+          save_move('F', path_taken);
+
           #ifdef DEBUG
           Serial.print("-- Current state test = FOLLOW \n");
           #endif
@@ -754,6 +757,9 @@ void Test_FSM_Handler()
         break;
 
       case RIGHT_TURN_TEST:
+
+        save_move('R', path_taken);
+
         #ifdef DEBUG
         Serial.printf("-- Current state test = RIGHT_TURN \n");
         #endif
@@ -779,6 +785,9 @@ void Test_FSM_Handler()
         break;
 
       case LEFT_TURN_TEST:
+
+        save_move('L', path_taken);
+
         #ifdef DEBUG
         Serial.printf("-- Current state test = LEFT_TURN \n");
         #endif
@@ -804,6 +813,8 @@ void Test_FSM_Handler()
         break;
 
       case U_TURN_TEST:
+
+        save_move('U', path_taken);
 
         #ifdef DEBUG
         Serial.print("-- Current state test = U_TURN \n");
