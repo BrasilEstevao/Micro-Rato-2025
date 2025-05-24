@@ -19,8 +19,6 @@ void setup()
 {
 
   Serial.begin();
-
-  init_ST();
   
   pinMode (START_BUTTON,INPUT_PULLUP);
   pinMode (RESET_BUTTON,INPUT_PULLUP);
@@ -52,7 +50,7 @@ void setup()
   analogReadResolution(10);
 
   //Initialize the robot stopped
-  currentStateTest = STOP_TEST;
+ 
   
 }
 

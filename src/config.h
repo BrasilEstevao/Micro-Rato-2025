@@ -1,5 +1,5 @@
 #define START_BUTTON 7
-#define RESET_BUTTON 26
+#define RESET_BUTTON 27
 
 
 #define ENC1_A 2
@@ -25,7 +25,7 @@
 
 #define TINY_CTRL_PIN	21
 
-#define NOMINAL_SPEED  FOLLOW_SPEED +40  //0-255 directly to motors PWM
+#define NOMINAL_SPEED  FOLLOW_SPEED +50//0-255 directly to motors PWM
 
 #define FOLLOW_SPEED   50//0-255 directly to motors PWM
 //tested values

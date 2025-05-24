@@ -49,7 +49,7 @@ class robot_t {
   int PWM_1_req, PWM_2_req;
   control_mode_t control_mode;
 
-  double  IRkp = 1, IRki = 0, IRkd =2 ;
+  double  IRkp = 0.1, IRki = 0, IRkd =0.3;
   //d =0.35 and 120 good
   double lastIRkp = IRkp, lastIRki = IRki, lastIRkd = IRkd;
 
@@ -83,7 +83,7 @@ float right_v = 0.0, left_v = 0.0, right_w = 0.0, left_w = 0.0;
   void followLineRight(float Vnom, float K);
   void followLineLeft(float Vnom, float K);
   void followLine();
-
+  //bool align();
   //node functions
 
   void stop();

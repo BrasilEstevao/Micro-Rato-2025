@@ -161,10 +161,11 @@ void IRLine_t::printIRLine(void)
 
 
 //Node detection
-char IRLine_t::detectNode(char pastNode )
+char IRLine_t::detectNode( )
 {
   static char last_node = 'E';
   static int stability_count = 0;
+  static int  required_stability = 80;
   
 
   char current_node;

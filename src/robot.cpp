@@ -166,6 +166,7 @@ int robot_t::IR_sum()
     if (robot.IR_sum() < 2500) {
         
         error = -1.1 * IRLine.IR_values[0] - 1.0 * IRLine.IR_values[1] + 1.0 * IRLine.IR_values[3] + 1.1 * IRLine.IR_values[4];
+        Serial.printf(" %d ", error);
 
         
         integral += error;
@@ -202,6 +203,42 @@ int robot_t::IR_sum()
     }
 }
 
+// bool robot_t::align() 
+//  {
+//       int IR_tresh = robot.IRLine.IR_tresh;
+  
+//       error = -1.1 * IRLine.IR_values[0] - 1.0 * IRLine.IR_values[1] + 1.0 * IRLine.IR_values[3] + 1.1 * IRLine.IR_values[4];
+
+//       if(error < 400 )
+//       {
+//         return true;
+//       }
+
+
+
+      
+//       integral += error;
+//       derivative = error - prevError;
+//       prevError = error;
+
+      
+//       int correction  = (IRkp * error + IRki * integral + IRkd * derivative); //PID constants are defined in robot.h
+
+      
+//       if (correction > 100) correction = 100; // Max correction limit
+//       else if (correction < -100) correction = -100; // Min correction limit
+
+//       // Apply the PID correction to the motor PWM values
+//       int right_PWM = correction; // Subtract from left motor
+//       int left_PWM = - correction; // Add to right motor
+
+//       //Serial.printf(" %d ", correction);
+//       // Apply the PWM values to the motors
+//       PWM_1 = left_PWM;
+//       PWM_2 = right_PWM;
+     
+    
+// }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -222,7 +259,7 @@ void robot_t::right_turn()
        PWM_2 = 0;
     }
 
-    if (millis() - start_time > 600) { // 435ms to turn ~90º
+    if (millis() - start_time > 400) { // 435ms to turn ~90º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }
@@ -239,7 +276,7 @@ void robot_t::left_turn()
        PWM_2 = nominal_speed;
     }
 
-    if (millis() - start_time > 600) { // 435ms to turn ~90º
+    if (millis() - start_time > 400) { // 435ms to turn ~90º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }

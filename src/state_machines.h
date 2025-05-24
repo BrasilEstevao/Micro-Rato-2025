@@ -27,8 +27,8 @@ typedef enum {
   RIGHT_TURN_MAP, 
   REVERSE,    
   SMALL_FORWARD, 
-  FORWARD_MAP,   
-  END        
+  FORWARD_MAP,
+  END      
 } StateNamesMap;
 
 // Solving state machine state names
@@ -53,14 +53,15 @@ typedef enum {
   U_TURN_TEST,
   STOP_TEST,
   END_TEST,
+  ALIGNING_TEST,
   IDLE_TEST
 } StateNamesTest;
 
 // Extern variables
-// extern StateNamesMain currentStateMain;
-// extern StateNamesMap currentStateMap;
-// extern StateNamesSolve currentStateSolve;
-extern StateNamesTest currentStateTest;
+// // extern StateNamesMain currentStateMain;
+// // extern StateNamesMap currentStateMap;
+// // extern StateNamesSolve currentStateSolve;
+// extern StateNamesTest currentStateTest;
 
 
 

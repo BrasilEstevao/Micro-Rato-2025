@@ -64,7 +64,7 @@ class IRLine_t
     //void calcIRLineCenter(void);
     
 
-    char detectNode(char pastNode);
+    char detectNode();
 
 };
 

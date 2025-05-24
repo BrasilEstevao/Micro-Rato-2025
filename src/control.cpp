@@ -1,6 +1,6 @@
 //#define RUN 
 #define TEST 1
-//#define DEBUG 1
+#define DEBUG 1
 //#define SUPERDEBUG 1
 
 #include <Arduino.h>
@@ -11,7 +11,7 @@
 
 extern robot_t robot;
 
-stack<char> path_taken, solved_path;
+stack<char> path_taken, solved_path, tempStack;
 
 StateNamesMain currentStateMain = IDLE_MAIN;
 StateNamesMap currentStateMap = IDLE_MAP;
@@ -23,8 +23,7 @@ bool END_MAP = false;
 bool END_SOLVE = false;
 
 bool cross=false;
-int turn_stability = 40;
-char pastNode = '0';
+int counter_align=0;
 static unsigned long forwardStartTime = 0;
 
 
@@ -41,22 +40,7 @@ unsigned int start_time = 0, end_time = 0, cycle_time = 0;
 // Timers (exemplo)
 
 
-// timerBlock timer_Exampler;
-
-void init_ST()
-{
-	// Inicializa estados
-	currentStateMain = IDLE_MAIN;
-	currentStateMap = IDLE_MAP;
-	currentStateSolve = IDLE_SOLVE;
-	currentStateTest = FORWARD_TEST;
-
-	// Variáveis internas
-	END_MAP = false;
-	END_SOLVE = false;
-
-	// Outputs iniciais (exemplo: motores desligados)
-}
+// timerBlock timer_Exampler
 
 void edge_detection()
 {
@@ -612,8 +596,7 @@ switch(currentStateSolve)
 void Test_FSM_Handler()
 {
     // Declare 'type_of_node' once, outside the switch statement
-    char type_of_node = robot.IRLine.detectNode(pastNode);
-    pastNode = type_of_node;
+    char type_of_node = robot.IRLine.detectNode();
     // Debugging output
     // Serial.printf("RE_START_BUTTON %d\n", re_START_BUTTON);
     // Serial.println();
@@ -676,40 +659,65 @@ void Test_FSM_Handler()
               #ifdef SUPERDEBUG
               Serial.printf("-- Current state test = FOLLOW_TEST (B) \n");
               #endif
-              currentStateTest = FORWARD_TEST;
+              forwardStartTime = 0;
+              currentStateTest =SMALL_FORWARD_TEST;
           }
           break;
           
-      case FORWARD_TEST:
-        #ifdef DEBUG
-        Serial.print("-- Current state test = FORWARD \n");
-        #endif
+        //  case SMALL_FORWARD_TEST:
+        // #ifdef DEBUG
+        // Serial.print("-- Current state test = SMALL_FORWARD\n");
+        // #endif
 
-        if(re_START_BUTTON == 1)
-        {
+        // // Check if enough time has passed or if the robot has moved a small distance.
+        
+        // static bool hasMovedEnough = false;
 
-          #ifdef SUPERDEBUG
-          Serial.printf("-- Current state test = FORWARD_TEST \n");
-          #endif
-          currentStateTest = STOP_TEST;
-        }
-        else if(type_of_node == 'N')  // Black, End of path
-        { 
-          if(!pushedF)
-          {
-            path_taken.push('F');
-            Serial.println("Pushed F");
-            pushedF = true;
-          }
+        // if (forwardStartTime == 0) 
+        // {
+        //     // First time entering SMALL_FORWARD_TEST, start the timer
+        //     forwardStartTime = millis();
+        // }
 
-            #ifdef SUPERDEBUG
-            Serial.printf("-- Current state test = FORWARD_TEST \n");
-            #endif
-            currentStateTest = FOLLOW_TEST;
-        }
-        break;
+        // // Check if the robot has moved forward long enough (adjust time as necessary)
+        // if (millis() - forwardStartTime > 200) { // 1000 ms = 1 second, adjust this as needed
+        //     hasMovedEnough = true;
+        // }
 
-         case SMALL_FORWARD_TEST:
+        // if (hasMovedEnough) 
+        // {
+        //     // Check the node type after moving a little further
+          
+        //       if (type_of_node == 'B')  // Black, End of path
+        //     { 
+        //         currentStateTest = END_TEST;
+        //     }
+        //     else if (type_of_node == 'N')  // Cross or Right T junction
+        //     { 
+
+        //       currentStateTest = FOLLOW_TEST;
+        //       path_taken.push('F');
+
+        //        if(cross == true)
+        //        {
+        //         path_taken.pop();
+        //         cross = false;
+        //         currentStateTest = BACKWARD_TEST;
+        //        }
+                
+        //     }
+        //     else if (type_of_node == 'W')  // White, U-turn
+        //     { 
+        //         currentStateTest = BACKWARD_TEST;
+        //     }
+
+        //     forwardStartTime = 0;  // Reset the timer
+        //     hasMovedEnough = false; // Reset the movement condition
+        // }
+
+        // break;
+
+          case SMALL_FORWARD_TEST:
         #ifdef DEBUG
         Serial.print("-- Current state test = SMALL_FORWARD\n");
         #endif
@@ -725,7 +733,7 @@ void Test_FSM_Handler()
         }
 
         // Check if the robot has moved forward long enough (adjust time as necessary)
-        if (millis() - forwardStartTime > 100) { // 1000 ms = 1 second, adjust this as needed
+        if (millis() - forwardStartTime > 200) { // 1000 ms = 1 second, adjust this as needed
             hasMovedEnough = true;
         }
 
@@ -739,10 +747,13 @@ void Test_FSM_Handler()
             }
             else if (type_of_node == 'N')  // Cross or Right T junction
             { 
+
               currentStateTest = FOLLOW_TEST;
+              path_taken.push('F');
 
                if(cross == true)
                {
+                path_taken.pop();
                 cross = false;
                 currentStateTest = BACKWARD_TEST;
                }
@@ -773,12 +784,13 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-       else  if (type_of_node == 'N' )  // Turn finished
+       else  if (type_of_node == 'N')  // Turn finished
         {
 
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = RIGHT_TURN_TEST \n");
             #endif
+            path_taken.push('R');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
@@ -798,12 +810,13 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (robot.IRLine.detectNode(turn_stability) == 'N')  // Turn finished
+        else if (type_of_node == 'N')  // Turn finished
         {
 
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = LEFT_TURN_TEST \n");
             #endif
+            path_taken.push('L');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
@@ -824,12 +837,12 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (robot.IRLine.detectNode(turn_stability) == 'N') // U-turn finished
+        else if (type_of_node == 'N') // U-turn finished
         {
-
             #ifdef SUPERDEBUG
             Serial.printf("-- Current state test = U_TURN_TEST (end_turn) \n");
             #endif
+            path_taken.push('U');
             currentStateTest = FOLLOW_TEST;
             robot.END_TURN = false;
         }
@@ -903,6 +916,15 @@ void Test_FSM_Handler()
             #endif
             currentStateTest = FOLLOW_TEST;
         }
+        
+
+        Serial.println("Taken Path: ");
+        while (!path_taken.empty()) {
+            char c = path_taken.top();
+            Serial.print(c);
+            path_taken.pop();
+        }
+        Serial.println();
 
         break;
     }
@@ -947,18 +969,16 @@ void Test_FSM_Handler()
       case STOP_TEST:
         robot.stop();
         break;
-        
-
       case END_TEST:
         // #ifdef DEBUG
         // Serial.printf("-- Current state test = END \n");
         // #endif
 
         robot.stop();
-        solved_path = get_path(path_taken);  // Process the path once the test is over
-        Serial.print("Taken Path: ");
-        while (!path_taken.empty()) {
-            char c = path_taken.top();
+        tempStack = path_taken; // Process the path once the test is over
+        Serial.println("Taken Path: ");
+        while (!tempStack.empty()) {
+            char c = tempStack.top();
             Serial.print(c);
             path_taken.pop();
         }
