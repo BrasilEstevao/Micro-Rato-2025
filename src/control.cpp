@@ -22,6 +22,9 @@ StateNamesTest currentStateTest = FOLLOW_TEST;
 bool END_MAP = false;
 bool END_SOLVE = false;
 
+bool cross=false;
+static unsigned long forwardStartTime = 0;
+
 
 //edge detection variables
 int p_START_BUTTON = 0;
@@ -618,6 +621,7 @@ void Test_FSM_Handler()
     static bool pushedU = false;  // Flag for U-turn state
     static bool pushedF = false;  // Flag for Forward state
 
+
     switch (currentStateTest)
     {
       case FOLLOW_TEST:
@@ -640,12 +644,15 @@ void Test_FSM_Handler()
           }
 
 
-          if (type_of_node == 'R')
+          if (type_of_node == 'B')
           {
 
               #ifdef SUPERDEBUG
               Serial.printf("-- Current state test = FOLLOW_TEST (R) \n");
               #endif
+
+              forwardStartTime = 0;
+              cross = true;
               currentStateTest = SMALL_FORWARD_TEST;
           } 
           else if (type_of_node == 'L') {
@@ -662,12 +669,12 @@ void Test_FSM_Handler()
               #endif
               currentStateTest = U_TURN_TEST;
           } 
-          else if (type_of_node == 'B') {
-
+          else if(type_of_node == 'R')
+          {
               #ifdef SUPERDEBUG
               Serial.printf("-- Current state test = FOLLOW_TEST (B) \n");
               #endif
-              currentStateTest = SMALL_FORWARD_TEST;
+              currentStateTest = FORWARD_TEST;
           }
           break;
           
@@ -706,7 +713,7 @@ void Test_FSM_Handler()
         #endif
 
         // Check if enough time has passed or if the robot has moved a small distance.
-        static unsigned long forwardStartTime = 0;
+        
         static bool hasMovedEnough = false;
 
         if (forwardStartTime == 0) 
@@ -730,12 +737,14 @@ void Test_FSM_Handler()
             }
             else if (type_of_node == 'N')  // Cross or Right T junction
             { 
-                if (!pushedF)  // Only push 'F' if not already pushed for this state
-                {
-                    path_taken.push('F');
-                    pushedF = true;  // Set the flag to prevent pushing again
-                }
-                currentStateTest = FOLLOW_TEST;
+              currentStateTest = FOLLOW_TEST;
+
+               if(cross == true)
+               {
+                cross = false;
+                currentStateTest = BACKWARD_TEST;
+               }
+                
             }
             else if (type_of_node == 'W')  // White, U-turn
             { 
@@ -762,7 +771,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-       else  if (robot.END_TURN == true )  // Turn finished
+       else  if (type_of_node == 'N' )  // Turn finished
         {
 
             #ifdef SUPERDEBUG
@@ -787,7 +796,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (robot.END_TURN == true)  // Turn finished
+        else if (type_of_node == 'N')  // Turn finished
         {
 
             #ifdef SUPERDEBUG
@@ -918,33 +927,14 @@ void Test_FSM_Handler()
         break;
 
       case RIGHT_TURN_TEST:
-
-         if (!pushedR)  // Only push 'R' if not already pushed for this state
-            {
-                path_taken.push('R');
-                Serial.println("Pushed R");
-                pushedR = true;  // Set the flag to prevent pushing again
-         }
         robot.right_turn();
         break;
 
       case LEFT_TURN_TEST:
-
-         if (!pushedL)  // Only push 'R' if not already pushed for this state
-            {
-                path_taken.push('L');
-                pushedR = true;  // Set the flag to prevent pushing again
-            }
         robot.left_turn();
         break;
 
       case U_TURN_TEST:
-        if(!pushedU)  // Only push 'F' if not already pushed for this state
-            {
-                path_taken.push('U');
-                Serial.println("Pushed U");
-                pushedU = true;  // Set the flag to prevent pushing again
-            }
         robot.u_turn();
         break;
 

@@ -222,7 +222,7 @@ void robot_t::right_turn()
        PWM_2 = 0;
     }
 
-    if (millis() - start_time > 500) { // 435ms to turn ~90º
+    if (millis() - start_time > 600) { // 435ms to turn ~90º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }
@@ -239,7 +239,7 @@ void robot_t::left_turn()
        PWM_2 = nominal_speed;
     }
 
-    if (millis() - start_time > 500) { // 435ms to turn ~90º
+    if (millis() - start_time > 600) { // 435ms to turn ~90º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }
@@ -254,7 +254,7 @@ void robot_t::left_turn()
        PWM_2 = -nominal_speed;
     }
 
-    if (millis() - start_time > 100) { // 833ms to turn ~180º
+    if (millis() - start_time > 80) { // 833ms to turn ~180º
         END_TURN = true;
         start_time = 0; // reset for next turn
     }

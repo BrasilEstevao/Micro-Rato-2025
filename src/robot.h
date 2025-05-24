@@ -49,9 +49,8 @@ class robot_t {
   int PWM_1_req, PWM_2_req;
   control_mode_t control_mode;
 
-  double  IRkp = 0.1, IRki = 0, IRkd = 0.30;
+  double  IRkp = 0.3, IRki = 0, IRkd =0.6 ;
   //d =0.35 and 120 good
-  
   double lastIRkp = IRkp, lastIRki = IRki, lastIRkd = IRkd;
 
   double error;         // Error
