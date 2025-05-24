@@ -142,12 +142,12 @@ void main_FSM_Handler()
 
 
 				
-				if(digitalRead(START_BUTTON))
+				if(re_START_BUTTON)
 				{
 					currentStateMain = SOLVE;
 				}
 
-        if(digitalRead(RESET_BUTTON))
+        if(re_RESET_BUTTON))
         {
           currentStateMain = MAP;
         }
@@ -173,12 +173,12 @@ void main_FSM_Handler()
 			#endif
 		
 			
-			if (digitalRead(START_BUTTON)) 
+			if (re_START_BUTTON) 
 			{
         currentStateMain = SOLVE;
 			}
 
-      if(digitalRead(RESET_BUTTON))
+      if(re_RESET_BUTTON)
       {
         currentStateMain = IDLE_MAIN;
       }
@@ -192,16 +192,16 @@ void main_FSM_Handler()
 switch(currentStateMain)
     {
     case IDLE_MAIN:
-        //stop motors
+        robot.stop();
         // clear up instructions and temporary stacks 
         break;
 
     case MAP:
-        //stop motors again( I guess)
         break;
 
     case READY:
         //copy instructions to temporary stack; (for running again if needed)
+        robot.stop();
         break;
 
     default:
@@ -424,6 +424,7 @@ switch(currentStateMap)
 
 void Solve_FSM_Handler()
 {
+  
   	switch (currentStateSolve)
 		{
 
@@ -451,7 +452,7 @@ void Solve_FSM_Handler()
         printf("-- Current state solve = FOLLOW_LINE\n");
         #endif
 
-        if(Detect_node)
+        if(detectNode() != 'N')
         {
           currentStateSolve  = GET_INSTRUCTION;
         }
@@ -465,6 +466,8 @@ void Solve_FSM_Handler()
         #ifdef DEBUG
         printf("-- Current state solve = GET_INSTRUCTION\n");
         #endif
+        char instruction = stack.top();
+        stack.pop();
 
 				if(instruction == 'R')
 				{
@@ -497,7 +500,7 @@ void Solve_FSM_Handler()
         printf("-- Current state solve = RIGHT_TURN_SOLVE\n");
         #endif
 
-        if(back_on_line)
+        if(detectNode() == 'N' && robot.END_TURN) 
         {
           currentStateSolve = FOLLOW_LINE_SOLVE;
         }
@@ -512,7 +515,7 @@ void Solve_FSM_Handler()
         printf("-- Current state solve = LEFT_TURN_SOLVE\n");
         #endif
 
-        if(back_on_line)
+        if(detectNode() == 'N' && robot.END_TURN)
         {
           currentStateSolve = FOLLOW_LINE_SOLVE;
         }
@@ -525,7 +528,7 @@ void Solve_FSM_Handler()
         printf("-- Current state solve = FORWARD_SOLVE\n");
         #endif
 
-        if(OOXOO)
+        if(detectNode() == 'N')
         {
           currentStateSolve = FOLLOW_LINE_SOLVE;
         }
@@ -836,7 +839,7 @@ void Test_FSM_Handler()
             currentStateTest = STOP_TEST;
         }
 
-        else if (type_of_node == 'R')  // Reversing until find right turn
+        if (type_of_node == 'R')  // Reversing until find right turn
         {
 
             #ifdef SUPERDEBUG
@@ -880,6 +883,7 @@ void Test_FSM_Handler()
         #endif
 
         robot.END_TURN = false;
+        END_MAP = true;
 
         if (re_START_BUTTON == 1)
         {
