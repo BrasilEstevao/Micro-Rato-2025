@@ -39,7 +39,7 @@ extern robot_t robot;
 IRLine_t::IRLine_t()
 {
   IR_WaterLevel = 0;
-  IR_tresh = 512;
+  IR_tresh = 850;
   cross_tresh = 3;
   black_cross_level = 2.8;
 }
@@ -165,7 +165,7 @@ char IRLine_t::detectNode( )
 {
   static char last_node = 'E';
   static int stability_count = 0;
-  static int  required_stability = 80;
+  static int  required_stability = 20;
   
 
   char current_node;
