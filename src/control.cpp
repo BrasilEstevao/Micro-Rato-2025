@@ -640,7 +640,7 @@ void Test_FSM_Handler()
           pushedU = false;
           pushedF = false;
 
-          if (re_START_BUTTON == 1)
+          if (buttonStart_RE == 1)
           {
             #ifdef SUPERDEBUG
           Serial.printf("-- Current state test =  FOLLOW_TEST (re_START_BUTTON) \n");
@@ -768,7 +768,7 @@ void Test_FSM_Handler()
         Serial.printf("-- Current state test = RIGHT_TURN \n");
         #endif
         
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
@@ -793,7 +793,7 @@ void Test_FSM_Handler()
         Serial.printf("-- Current state test = LEFT_TURN \n");
         #endif
        
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
@@ -819,7 +819,7 @@ void Test_FSM_Handler()
         Serial.print("-- Current state test = U_TURN \n");
         #endif
         
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
@@ -844,7 +844,7 @@ void Test_FSM_Handler()
         #endif
 
         type_of_node = robot.IRLine.detectNode();
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
@@ -880,7 +880,7 @@ void Test_FSM_Handler()
 
         robot.END_TURN = false;
 
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
@@ -898,7 +898,7 @@ void Test_FSM_Handler()
 
         robot.END_TURN = false;
 
-        if (re_START_BUTTON == 1)
+        if (buttonStart_RE == 1)
         {
 
             #ifdef SUPERDEBUG
