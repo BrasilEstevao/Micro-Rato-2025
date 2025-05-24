@@ -643,22 +643,8 @@ void Test_FSM_Handler()
               cross = true;
               currentStateTest = SMALL_FORWARD_TEST;
           } 
-          else if (type_of_node == 'L') {
 
-              #ifdef SUPERDEBUG
-              Serial.printf("-- Current state test = FOLLOW_TEST (L) \n");
-              #endif
-              path_taken.push('L');
-              currentStateTest = LEFT_TURN_TEST;
-          } 
-          else if (type_of_node == 'W') {
-
-              #ifdef SUPERDEBUG
-              Serial.printf("-- Current state test = FOLLOW_TEST (W) \n");
-              #endif
-              currentStateTest = U_TURN_TEST;
-          } 
-          else if(type_of_node == 'R')
+           if(type_of_node == 'R')
           {
               #ifdef SUPERDEBUG
               Serial.printf("-- Current state test = FOLLOW_TEST (B) \n");
@@ -666,6 +652,24 @@ void Test_FSM_Handler()
                forwardStartTime = 0;
               currentStateTest =SMALL_FORWARD_TEST;
           }
+
+         else if (type_of_node == 'L') {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (L) \n");
+              #endif
+              path_taken.push('L');
+              currentStateTest = LEFT_TURN_TEST;
+          } 
+          else if (type_of_node == 'W')
+           {
+
+              #ifdef SUPERDEBUG
+              Serial.printf("-- Current state test = FOLLOW_TEST (W) \n");
+              #endif
+              currentStateTest = U_TURN_TEST;
+          } 
+         
           break;
           
       case FORWARD_TEST:
@@ -712,7 +716,7 @@ void Test_FSM_Handler()
         }
 
         // Check if the robot has moved forward long enough (adjust time as necessary)
-        if (millis() - forwardStartTime > 200) { // 1000 ms = 1 second, adjust this as needed
+        if (millis() - forwardStartTime > 300) { // 1000 ms = 1 second, adjust this as needed
             hasMovedEnough = true;
         }
 
